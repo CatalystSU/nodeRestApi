@@ -14,10 +14,11 @@ server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
 */
-var express = require('express'),
-  app = express(),
-  port = process.env.PORT || 3000;
-
+var express = require('express');
+app = express();
+cors = require('cors');
+port = process.env.PORT || 3000;
+app.use(cors());
 app.listen(port);
 
 console.log('todo list RESTful API server started on: ' + port);
