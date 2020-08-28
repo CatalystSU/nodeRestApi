@@ -11,7 +11,7 @@ router.post('/create', (req, res, next) => {
         id: req.body.id
     }
     session
-    .run('CREATE (n:Project {name:$name, id:$id})', request)
+    .run('CREATE (n:Project {name:$name)', request)
     .then(function(result) {
         res.status(200).json(result);
         result.records.forEach(function(record) {
