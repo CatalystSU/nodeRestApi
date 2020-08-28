@@ -10,7 +10,7 @@ router.post('/create', (req, res, next) => {
         name: req.body.name
     }
     session
-    .run('CREATE (n:Project {name:$name)', request)
+    .run('CREATE (n:Project {name:$name})', request)
     .then(function(result) {
         res.status(200).json(result);
         result.records.forEach(function(record) {
@@ -24,9 +24,25 @@ router.post('/create', (req, res, next) => {
     });
     
 })
-//MATCH (movie:Movie)
-//RETURN movie.title
-router.get('/get', (req, res, next) => {
+
+router.get('/all', (req, res, next) => {
+    var session = driver.session();
+
+    session
+    .run('MATCH (n:Project) RETURN n')
+    .then(function(result) {
+        res.status(200).json(result);
+        result.records.forEach(function(record) {
+            console.log(record.get('n').properties.name)
+        });
+        session.close();
+    })
+    .catch(function(error) {
+        console.log(error);
+    });
+});
+
+router.get('/:id', (req, res, next) => {
     var session = driver.session();
 
     session
