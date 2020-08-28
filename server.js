@@ -24,7 +24,6 @@ var driver = neo4j.driver(
 
 var session = driver.session();
 
-
 var express = require('express');
 app = express();
 cors = require('cors');
@@ -34,7 +33,7 @@ app.listen(port);
 
 console.log('todo list RESTful API server started on: ' + port);
 
-const projects = require('./project');
+const projects = require('./projects');
 const test = require('./test');
 app.use('/project', projects);
 app.use('/', test);
@@ -56,4 +55,3 @@ app.use((error, req, res, next) => {
   next(error)
 });
 
-module.exports = app;
