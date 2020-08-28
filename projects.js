@@ -6,10 +6,15 @@ var driver = require('./neo4j');
 
 router.post('/create', (req, res, next) => {
     var session = driver.session();
-
+    console.log(req.body)
+    var request = {
+        name: req.body.name,
+        id: req.body.id
+    }
     session
-    .run('CREATE ($project_name:Project {id:$id})', req)
+    .run('CREATE (n:Project {name:$name, id:$id})', request)
     .then(function(result) {
+        res.status(200).json(result);
         result.records.forEach(function(record) {
             console.log(record.get('title'))
             console.log(record)
@@ -19,6 +24,7 @@ router.post('/create', (req, res, next) => {
     .catch(function(error) {
         console.log(error);
     });
+    
 })
 
 router.get('/get', (req, res, next) => {

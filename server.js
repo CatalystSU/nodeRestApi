@@ -15,29 +15,16 @@ server.listen(port, hostname, () => {
 });
 */
 
-var driver = require('./neo4j');
-
-var session = driver.session();
-
-session
-.run("MATCH (:Person {name: 'Tom Hanks'})-[:ACTED_IN]->(movies) RETURN movies.title AS title")
-.then(function(result) {
-    result.records.forEach(function(record) {
-        console.log(record.get('title'))
-        console.log(record)
-    });
-    session.close();
-})
-.catch(function(error) {
-    console.log(error);
-});
-
 var express = require('express');
 app = express();
 cors = require('cors');
 port = process.env.PORT || 3000;
 app.use(cors());
 app.listen(port);
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 
 console.log('todo list RESTful API server started on: ' + port);
 
