@@ -51,7 +51,6 @@ router.get('/:id', (req, res, next) => {
     .run('MATCH (p:Project) WHERE ID(p) = $id UNWIND p as x RETURN x', request)
     .then(function(result) {
         res.status(200).json(result);
-        console.log(result)
         result.records.forEach(function(record) {
             console.log(record.get('x').properties.name)
         });
