@@ -27,14 +27,14 @@ router.post('/create', (req, res, next) => {
 
 router.get('/all', (req, res, next) => {
     var session = driver.session();
-
+    var projects = [];
     session
     .run('MATCH (n:Project) RETURN n')
     .then(function(result) {
-        res.status(200).json(result);
         result.records.forEach(function(record) {
-            console.log(record.get('n').properties.name)
+            projects.push({name:record.get('n').properties.name});
         });
+        res.status(200).json(projects);
         session.close();
     })
     .catch(function(error) {
