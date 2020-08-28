@@ -15,14 +15,10 @@ server.listen(port, hostname, () => {
 });
 */
 
-var neo4j = require('neo4j-driver');
-
-var driver = neo4j.driver(
-  'bolt://robabrams.homeip.net:7687',
-   neo4j.auth.basic('neo4j', 'SuPr3m3L3d3r_TR0y')
-)
+var driver = require('./neo4j');
 
 var session = driver.session();
+
 session
 .run("MATCH (:Person {name: 'Tom Hanks'})-[:ACTED_IN]->(movies) RETURN movies.title AS title")
 .then(function(result) {

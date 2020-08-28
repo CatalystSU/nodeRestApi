@@ -52,7 +52,7 @@ const data =
   ]
 };
   
-router.get('/dummy/project', (req, res) => {
+router.get('/dummy/project', (req, res, next) => {
     res.status(200);
     res.json(data);
 });
