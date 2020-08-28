@@ -42,3 +42,8 @@ app.put('/', (req, res) => {
 app.delete('/', (req, res) => {
   return res.send('Received a DELETE HTTP method');
 });
+
+app.post('/login', (req, res) => {
+  res.status(200);
+  return res.send('Logged in');
+});
