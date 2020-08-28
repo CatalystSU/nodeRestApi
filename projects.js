@@ -6,7 +6,6 @@ var driver = require('./neo4j');
 
 router.post('/create', (req, res, next) => {
     var session = driver.session();
-    console.log(req.body)
     var request = {
         name: req.body.name,
         id: req.body.id
