@@ -25,6 +25,31 @@ router.post('/login', (req, res) => {
     res.status(200);
     return res.send('Logged in');
 });
+
+
+const data =
+{
+  name: "Task1",
+  children: [
+    {
+      name: "Task1a",
+      children: [
+        {
+          name: "Task1b",
+        },
+        {
+          name: "Task1c",
+        },
+        {
+          name: "Task1d",
+        }
+      ]
+    },
+    {
+      name: "Task2",
+    }
+  ]
+};
   
 router.get('/dummy/project', (req, res) => {
     res.status(200);

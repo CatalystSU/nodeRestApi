@@ -24,29 +24,6 @@ var driver = neo4j.driver(
 
 var session = driver.session();
 
-const data =
-{
-  name: "Task1",
-  children: [
-    {
-      name: "Task1a",
-      children: [
-        {
-          name: "Task1b",
-        },
-        {
-          name: "Task1c",
-        },
-        {
-          name: "Task1d",
-        }
-      ]
-    },
-    {
-      name: "Task2",
-    }
-  ]
-};
 
 var express = require('express');
 app = express();
