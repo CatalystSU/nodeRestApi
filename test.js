@@ -30,24 +30,24 @@ router.post('/login', (req, res) => {
 
 const data =
 {
-  name: "Task1",
+  name: "Task_1",
   children: [
     {
-      name: "Task1a",
+      name: "Task_1_a",
       children: [
         {
-          name: "Task1b",
+          name: "Task_1_b",
         },
         {
-          name: "Task1c",
+          name: "Task_1_c",
         },
         {
-          name: "Task1d",
+          name: "Task_1_d",
         }
       ]
     },
     {
-      name: "Task2",
+      name: "Task_2",
     }
   ]
 };
