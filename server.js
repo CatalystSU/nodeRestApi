@@ -23,6 +23,18 @@ var driver = neo4j.driver(
 )
 
 var session = driver.session();
+session
+.run("MATCH (:Person {name: 'Tom Hanks'})-[:ACTED_IN]->(movies) RETURN movies.title AS title")
+.then(function(result) {
+    result.records.forEach(function(record) {
+        console.log(record.get('title'))
+        console.log(record)
+    });
+    session.close();
+})
+.catch(function(error) {
+    console.log(error);
+});
 
 var express = require('express');
 app = express();
