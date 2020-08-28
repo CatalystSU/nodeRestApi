@@ -44,13 +44,16 @@ router.get('/all', (req, res, next) => {
 
 router.get('/:id', (req, res, next) => {
     var session = driver.session();
-
+    var request = {
+        id: Number(req.params.id)
+    }
     session
-    .run('MATCH (n:Project) RETURN n')
+    .run('MATCH (p:Project) WHERE ID(p) = $id UNWIND p as x RETURN x', request)
     .then(function(result) {
         res.status(200).json(result);
+        console.log(result)
         result.records.forEach(function(record) {
-            console.log(record.get('n').properties.name)
+            console.log(record.get('x').properties.name)
         });
         session.close();
     })
