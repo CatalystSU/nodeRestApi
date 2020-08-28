@@ -57,32 +57,26 @@ app.listen(port);
 
 console.log('todo list RESTful API server started on: ' + port);
 
-app.get("/url", (req, res, next) => {
-  res.json(["1","2","3","4","5"]);
- });
+const projects = require('./project');
+const test = require('./test');
+app.use('/project', projects);
+app.use('/', test);
 
-app.get('/', (req, res) => {
-  return res.send('Received a GET HTTP method');
+
+app.use((req, res, next) => {
+  const error = new Error('Not Found');
+  res.status(404);
+  next(error)
 });
 
-app.post('/', (req, res) => {
-  return res.send('Received a POST HTTP method');
+app.use((error, req, res, next) => {
+  res.status(error.status || 500);
+  res.json({
+      error: {
+          message: error.message
+      }
+  })
+  next(error)
 });
 
-app.put('/', (req, res) => {
-  return res.send('Received a PUT HTTP method');
-});
-
-app.delete('/', (req, res) => {
-  return res.send('Received a DELETE HTTP method');
-});
-
-app.post('/login', (req, res) => {
-  res.status(200);
-  return res.send('Logged in');
-});
-
-app.get('/dummy/project', (req, res) => {
-  res.status(200);
-  res.json(data);
-});
+module.exports = app;
