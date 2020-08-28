@@ -14,6 +14,31 @@ server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
 */
+
+const data =
+{
+  name: "Task1",
+  children: [
+    {
+      name: "Task1a",
+      children: [
+        {
+          name: "Task1b",
+        },
+        {
+          name: "Task1c",
+        },
+        {
+          name: "Task1d",
+        }
+      ]
+    },
+    {
+      name: "Task2",
+    }
+  ]
+};
+
 var express = require('express');
 app = express();
 cors = require('cors');
@@ -46,4 +71,9 @@ app.delete('/', (req, res) => {
 app.post('/login', (req, res) => {
   res.status(200);
   return res.send('Logged in');
+});
+
+app.get('/dummy/project', (req, res) => {
+  res.status(200);
+  res.json(data);
 });
