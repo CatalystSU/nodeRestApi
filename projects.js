@@ -32,7 +32,7 @@ router.get('/all', (req, res, next) => {
     .run('MATCH (n:Project) RETURN n')
     .then(function(result) {
         result.records.forEach(function(record) {
-            projects.push({name:record.get('n').properties.name});
+            projects.push({name:record.get('n').properties.name, id:record.get('n').identity.low});
         });
         res.status(200).json(projects);
         session.close();
@@ -50,10 +50,7 @@ router.get('/:id', (req, res, next) => {
     session
     .run('MATCH (p:Project) WHERE ID(p) = $id UNWIND p as x RETURN x', request)
     .then(function(result) {
-        res.status(200).json(result);
-        result.records.forEach(function(record) {
-            console.log(record.get('x').properties.name)
-        });
+        res.status(200).json({name:result.records[0].get('x').properties.name, id:result.records[0].get('x').identity.low});
         session.close();
     })
     .catch(function(error) {
