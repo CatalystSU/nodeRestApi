@@ -31,11 +31,11 @@ router.get('/get', (req, res, next) => {
     var session = driver.session();
 
     session
-    .run('MATCH (n:Project) UNWIND n as m RETURN m')
+    .run('MATCH (n:Project) RETURN n')
     .then(function(result) {
         res.status(200).json(result);
         result.records.forEach(function(record) {
-            console.log(record.get('m').properties.name)
+            console.log(record.get('n').properties.name)
         });
         session.close();
     })
