@@ -4,6 +4,9 @@ const router = express.Router();
 
 var driver = require('./neo4j');
 
+/**
+ * Create Project node, auto assigned ID
+ */
 router.post('/create', (req, res, next) => {
     var session = driver.session();
     var request = {
@@ -26,6 +29,9 @@ router.post('/create', (req, res, next) => {
     
 });
 
+/**
+ * Get All Project nodes
+ */
 router.get('/all', (req, res, next) => {
     var session = driver.session();
     var projects = [];
@@ -44,6 +50,9 @@ router.get('/all', (req, res, next) => {
     });
 });
 
+/**
+ * Get Project Node via ID
+ */
 router.get('/:id', (req, res, next) => {
     var session = driver.session();
     var request = {
@@ -61,6 +70,9 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
+/**
+ * Update Project node via ID
+ */
 router.post('/update/:id', (req, res, next) => {
     var session = driver.session();
     var request = {
@@ -80,6 +92,9 @@ router.post('/update/:id', (req, res, next) => {
     
 });
 
+/**
+ * Delete Project node via ID
+ */
 router.delete('/:id', (req, res, next) => {
     var session = driver.session();
     var request = {
