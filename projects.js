@@ -20,6 +20,7 @@ router.post('/create', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
+        res.status(500)
         console.log(error);
     });
     
@@ -38,6 +39,7 @@ router.get('/all', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
+        res.status(500)
         console.log(error);
     });
 });
@@ -54,6 +56,7 @@ router.get('/:id', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
+        res.status(404)
         console.log(error);
     });
 });
