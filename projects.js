@@ -56,7 +56,7 @@ router.get('/:id', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
-        res.status(404)
+        res.status(404).json({status:"id not found"})
         console.log(error);
     });
 });
