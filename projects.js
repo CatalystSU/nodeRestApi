@@ -61,6 +61,25 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
+router.post('/update/:id', (req, res, next) => {
+    var session = driver.session();
+    var request = {
+        id: Number(req.params.id),
+        name: req.body.name
+    }
+    session
+    .run('MATCH (p:Project) WHERE ID(p) = $id UNWIND p as x SET x = {name:$name} RETURN x', request)
+    .then(function(result) {
+        res.status(200).json({name:result.records[0].get('x').properties.name, id:result.records[0].get('x').identity.low});
+        session.close();
+    })
+    .catch(function(error) {
+        res.status(500).json({status:"Cannot Update project"})
+        console.log(error);
+    });
+    
+});
+
 router.delete('/:id', (req, res, next) => {
     var session = driver.session();
     var request = {
