@@ -23,7 +23,7 @@ router.post('/create', (req, res, next) => {
         console.log(error);
     });
     
-})
+});
 
 router.get('/all', (req, res, next) => {
     var session = driver.session();
@@ -52,6 +52,22 @@ router.get('/:id', (req, res, next) => {
     .then(function(result) {
         res.status(200).json({name:result.records[0].get('x').properties.name, id:result.records[0].get('x').identity.low});
         session.close();
+    })
+    .catch(function(error) {
+        console.log(error);
+    });
+});
+
+router.delete('/:id', (req, res, next) => {
+    var session = driver.session();
+    var request = {
+        id: Number(req.params.id)
+    }
+    session
+    .run('MATCH (n:Project) WHERE ID(n) = $id DELETE n', request)
+    .then(function() {
+        res.status(200).json("Deleted Project");
+        session.close;
     })
     .catch(function(error) {
         console.log(error);
