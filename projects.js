@@ -20,7 +20,7 @@ router.post('/create', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
-        res.status(500)
+        res.status(500).json({status:"Cannot create project"})
         console.log(error);
     });
     
@@ -39,7 +39,7 @@ router.get('/all', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
-        res.status(500)
+        res.status(500).json({status:"Cannot find projects"})
         console.log(error);
     });
 });
