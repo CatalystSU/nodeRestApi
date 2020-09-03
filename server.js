@@ -29,8 +29,10 @@ app.use(bodyParser.json());
 console.log('todo list RESTful API server started on: ' + port);
 
 const projects = require('./projects');
+const tasks = require('./tasks');
 const test = require('./test');
 app.use('/project', projects);
+app.use('/tasks', tasks);
 app.use('/', test);
 
 
