@@ -29,6 +29,32 @@ router.post('/create', (req, res, next) => {
 });
 
 /**
+ * Create Task node and link to project
+ */
+router.post('/test/create', (req, res, next) => {
+    var session = driver.session();
+    var request = {
+        project_id: req.body.project_id,
+        task_id: req.body.task_id,
+        name: req.body.name
+    }
+    session
+    .run('MATCH (p:Project) WHERE ID(p) = $project_id MATCH (t1:Task) WHERE ID(t1) = $task_id CREATE (t:Task {name:$name}) CREATE (t)-[:UNDER {task_id:[ID(t)]}]->(p), (t)-[:UNDER {task_id:[ID(t)]}]->(t1)', request)
+    .then(function(result) {
+        res.status(200).json(result);
+        result.records.forEach(function(record) {
+            console.log(record.get('title'))
+            console.log(record)
+        });
+        session.close();
+    })
+    .catch(function(error) {
+        res.status(500).json({status:"Cannot create task"})
+        console.log(error);
+    });
+});
+
+/**
  * Update Task node via ID
  */
 router.post('/update/:id', (req, res, next) => {
@@ -48,6 +74,28 @@ router.post('/update/:id', (req, res, next) => {
         console.log(error);
     });
     
+});
+
+
+/**
+ * Get all Task nodes
+ */
+router.get('/all', (req, res, next) => {
+    var session = driver.session();
+    var projects = [];
+    session
+    .run('MATCH (n:Task) RETURN n')
+    .then(function(result) {
+        result.records.forEach(function(record) {
+            projects.push({name:record.get('n').properties.name, id:record.get('n').identity.low});
+        });
+        res.status(200).json(projects);
+        session.close();
+    })
+    .catch(function(error) {
+        res.status(500).json({status:"Cannot get all tasks"})
+        console.log(error);
+    });
 });
 
 /**
@@ -70,26 +118,6 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
-/**
- * Get all Task nodes
- */
-router.get('/all', (req, res, next) => {
-    var session = driver.session();
-    var projects = [];
-    session
-    .run('MATCH (n:Task) RETURN n')
-    .then(function(result) {
-        result.records.forEach(function(record) {
-            projects.push({name:record.get('n').properties.name, id:record.get('n').identity.low});
-        });
-        res.status(200).json(projects);
-        session.close();
-    })
-    .catch(function(error) {
-        res.status(500).json({status:"Cannot get all tasks"})
-        console.log(error);
-    });
-});
 
 /**
  * Delete Task via node ID
