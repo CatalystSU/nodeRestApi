@@ -56,49 +56,56 @@ router.get('/all', (req, res, next) => {
 router.get('/temp/:id', (req, res, next) => {
     if (req.params.id == 5) {
         res.status(200).json({
-            name: "Epi_use3",
+            name: "Epi_use5",
             id: 5,
-            tasks: [
-                {name: "Task0", id:0, show: true},
-                {name: "Task1", id:1, show: true},
-                {name: "Task2", id:2, show: true},
-                {name: "Task3", id:3, show: true},
-                {name: "Task4", id:4, show: true},
-            ],
-            cons: [
-                {from: 0, to: 1},
-                {from: 0, to: 3},
-                {from: 1, to: 2},
-                {from: 2, to: 4},
-                {from: 3, to: 5},
-            ]
+            task_ob: {
+                tasks: [
+                    {name: "Task0", id:0, show: true},
+                    {name: "Task1", id:1, show: true},
+                    {name: "Task2", id:2, show: true},
+                    {name: "Task3", id:3, show: true},
+                    {name: "Task4", id:4, show: true},
+                ],
+                cons: [
+                    {from: 0, to: 1},
+                    {from: 0, to: 3},
+                    {from: 1, to: 2},
+                    {from: 2, to: 4},
+                    {from: 3, to: 5},
+                ]
+            }
+        });
+    } else if (req.params.id == 6) {
+        res.status(200).json({
+            name: "Epi_use6",
+            id: 6,
+            task_ob: {
+                tasks: [
+                    {name: "Task0", id:0, show: true},
+                    {name: "Task1", id:1, show: true},
+                    {name: "Task2", id:2, show: true},
+                    {name: "Task3", id:3, show: true},
+                    {name: "Task4", id:4, show: true},
+                    {name: "Task5", id:5, show: true},
+                    {name: "Task6", id:6, show: true},
+                    {name: "Task7", id:7, show: true},
+                ],
+                cons: [
+                    {from: 0, to: 1},
+                    {from: 0, to: 3},
+                    {from: 0, to: 7},
+                    {from: 1, to: 2},
+                    {from: 2, to: 4},
+                    {from: 3, to: 5},
+                    {from: 6, to: 1},
+                ]
+            }
         });
     } else {
-        res.status(200).json({
-            name: "Epi_use3",
-            id: 5,
-            tasks: [
-                {name: "Task0", id:0, show: true},
-                {name: "Task1", id:1, show: true},
-                {name: "Task2", id:2, show: true},
-                {name: "Task3", id:3, show: true},
-                {name: "Task4", id:4, show: true},
-                {name: "Task5", id:5, show: true},
-                {name: "Task6", id:6, show: true},
-                {name: "Task7", id:7, show: true},
-            ],
-            cons: [
-                {from: 0, to: 1},
-                {from: 0, to: 3},
-                {from: 0, to: 7},
-                {from: 1, to: 2},
-                {from: 2, to: 4},
-                {from: 3, to: 5},
-                {from: 6, to: 1},
-            ]
+        res.status(400).json({
+            message: "Not found"
         });
-    }
-    
+    };
 });
 
 /**
