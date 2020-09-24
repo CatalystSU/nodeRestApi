@@ -60,11 +60,11 @@ router.get('/temp/:id', (req, res, next) => {
             id: 5,
             task_ob: {
                 tasks: [
-                    {name: "Task0", id:0, show: true},
-                    {name: "Task1", id:1, show: true},
-                    {name: "Task2", id:2, show: true},
-                    {name: "Task3", id:3, show: true},
-                    {name: "Task4", id:4, show: true},
+                    {taskname: "Task0", id:0, show: true, personincharge: "Freddie", packagemanager: "Bob", startdate: "15/10/2020", duration: 3, enddate: "01/11/2020", taskresources: "ben, fred", taskprogress: 50},
+                    {taskname: "Task1", id:1, show: true, personincharge: "Henry", packagemanager: "Bob", startdate: "16/10/2020", duration: 4, enddate: "12/11/2020", taskresources: "ben, jeff", taskprogress: 23},
+                    {taskname: "Task2", id:2, show: true, personincharge: "Chloe", packagemanager: "Bob", startdate: "25/10/2020", duration: 3, enddate: "15/12/2020", taskresources: "franny, fred", taskprogress: 70},
+                    {taskname: "Task3", id:3, show: true, personincharge: "Lucy", packagemanager: "Bob", startdate: "15/11/2020", duration: 5, enddate: "17/11/2020", taskresources: "ben, bob", taskprogress: 50},
+                    {taskname: "Task4", id:4, show: true, personincharge: "Nick", packagemanager: "Bob", startdate: "16/10/2020", duration: 3, enddate: "18/10/2020", taskresources: "joe, nic", taskprogress: 60},
                 ],
                 cons: [
                     {from: 0, to: 1},
@@ -81,14 +81,14 @@ router.get('/temp/:id', (req, res, next) => {
             id: 6,
             task_ob: {
                 tasks: [
-                    {name: "Task0", id:0, show: true},
-                    {name: "Task1", id:1, show: true},
-                    {name: "Task2", id:2, show: true},
-                    {name: "Task3", id:3, show: true},
-                    {name: "Task4", id:4, show: true},
-                    {name: "Task5", id:5, show: true},
-                    {name: "Task6", id:6, show: true},
-                    {name: "Task7", id:7, show: true},
+                    {taskname: "Task0", id:0, show: true, personincharge: "Freddie", packagemanager: "Bob", startdate: "15/10/2020", duration: 3, enddate: "01/11/2020", taskresources: "ben, fred", taskprogress: 50},
+                    {taskname: "Task1", id:1, show: true, personincharge: "Henry", packagemanager: "Bob", startdate: "16/10/2020", duration: 4, enddate: "12/11/2020", taskresources: "ben, jeff", taskprogress: 23},
+                    {taskname: "Task2", id:2, show: true, personincharge: "Chloe", packagemanager: "Bob", startdate: "25/10/2020", duration: 3, enddate: "15/12/2020", taskresources: "franny, fred", taskprogress: 70},
+                    {taskname: "Task3", id:3, show: true, personincharge: "Lucy", packagemanager: "Bob", startdate: "15/11/2020", duration: 5, enddate: "17/11/2020", taskresources: "ben, bob", taskprogress: 50},
+                    {taskname: "Task4", id:4, show: true, personincharge: "Nick", packagemanager: "Bob", startdate: "16/10/2020", duration: 3, enddate: "18/10/2020", taskresources: "joe, nic", taskprogress: 60},
+                    {taskname: "Task5", id:5, show: true, personincharge: "Freddie", packagemanager: "Bob", startdate: "15/10/2020", duration: 3, enddate: "01/11/2020", taskresources: "ben, fred", taskprogress: 50},
+                    {taskname: "Task6", id:6, show: true, personincharge: "Henry", packagemanager: "Bob", startdate: "16/10/2020", duration: 4, enddate: "12/11/2020", taskresources: "ben, jeff", taskprogress: 23},
+                    {taskname: "Task7", id:7, show: true, personincharge: "Chloe", packagemanager: "Bob", startdate: "25/10/2020", duration: 3, enddate: "15/12/2020", taskresources: "franny, fred", taskprogress: 70},
                 ],
                 cons: [
                     {from: 0, to: 1},
@@ -165,6 +165,8 @@ router.delete('/:id', (req, res, next) => {
         session.close;
     })
     .catch(function(error) {
+        res.status(400).json("Project does not exist");
+        session.close
         console.log(error);
     });
 });
