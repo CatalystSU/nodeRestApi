@@ -33,7 +33,7 @@ router.post('/create', (req, res, next) => {
         taskprogress:$taskprogress}) \
         CREATE (t)-[:UNDER {task_id:[ID(t)]}]->(p)', request)
     .then(function(result) {
-        res.status(200).json(result);
+        res.status(200).json({status:"Created Task"});
         result.records.forEach(function(record) {
             console.log(record.get('title'))
             console.log(record)
@@ -60,7 +60,7 @@ router.post('/link', (req, res, next) => {
         MATCH (t2:Task) WHERE ID(t2) = $task_id2\
         CREATE (t1)-[:UNDER]->(t2)', request)
     .then(function(result) {
-        res.status(200).json(result);
+        res.status(200).json({status:"Created Link"});
         result.records.forEach(function(record) {
             console.log(record.get('title'))
             console.log(record)
@@ -68,7 +68,7 @@ router.post('/link', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
-        res.status(500).json({status:"Cannot create task"})
+        res.status(500).json({status:"Cannot create Link"})
         console.log(error);
     });
 });
