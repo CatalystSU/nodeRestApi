@@ -117,9 +117,11 @@ router.get('/:id', (req, res, next) => {
         id: Number(req.params.id)
     }
     session
-    .run('MATCH (p:Project) WHERE ID(p) = $id UNWIND p as x RETURN x', request)
+    .run('  MATCH (p:Project) WHERE ID(p) = $id \
+            MATCH (p)<-[:UNDER]-(n) \
+            RETURN n, p', request)
     .then(function(result) {
-        res.status(200).json({name:result.records[0].get('x').properties.name, id:result.records[0].get('x').identity.low});
+        res.status(200).json(result);
         session.close();
     })
     .catch(function(error) {

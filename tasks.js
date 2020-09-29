@@ -35,13 +35,13 @@ router.post('/create', (req, res, next) => {
     .then(function(result) {
         res.status(200).json({status:"Created Task"});
         result.records.forEach(function(record) {
-            console.log(record.get('title'))
-            console.log(record)
+            console.log(record.get('title'));
+            console.log(record);
         });
         session.close();
     })
     .catch(function(error) {
-        res.status(500).json({status:"Cannot create task"})
+        res.status(500).json({status:"Cannot create task"});
         console.log(error);
     });
 });
@@ -54,7 +54,7 @@ router.post('/link', (req, res, next) => {
     var request = {
         task_id1: req.body.task_id1,
         task_id2: req.body.task_id2
-    }
+    };
     session
     .run('MATCH (t1:Task) WHERE ID(t1) = $task_id1\
         MATCH (t2:Task) WHERE ID(t2) = $task_id2\
@@ -62,13 +62,13 @@ router.post('/link', (req, res, next) => {
     .then(function(result) {
         res.status(200).json({status:"Created Link"});
         result.records.forEach(function(record) {
-            console.log(record.get('title'))
-            console.log(record)
+            console.log(record.get('title'));
+            console.log(record);
         });
         session.close();
     })
     .catch(function(error) {
-        res.status(500).json({status:"Cannot create Link"})
+        res.status(500).json({status:"Cannot create Link"});
         console.log(error);
     });
 });
@@ -90,7 +90,7 @@ router.post('/update/:id', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
-        res.status(500).json({status:"Cannot Update Task"})
+        res.status(500).json({status:"Cannot Update Task"});
         console.log(error);
     });
     
@@ -123,7 +123,7 @@ router.get('/all', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
-        res.status(500).json({status:"Cannot get all tasks"})
+        res.status(500).json({status:"Cannot get all tasks"});
         console.log(error);
     });
 });
@@ -153,7 +153,7 @@ router.get('/:id', (req, res, next) => {
         session.close();
     })
     .catch(function(error) {
-        res.status(404).json({status:"id not found"})
+        res.status(404).json({status:"id not found"});
         console.log(error);
     });
 });
