@@ -208,7 +208,7 @@ router.delete('/:id', (req, res, next) => {
     session
     .run('MATCH (n:Task) WHERE ID(n) = $id DETACH DELETE n', request)
     .then(function() {
-        res.status(200).json("Deleted Project");
+        res.status(200).json("Deleted Task");
         session.close;
     })
     .catch(function(error) {
