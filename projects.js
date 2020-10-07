@@ -135,7 +135,7 @@ router.get('/:id', (req, res, next) => {
     .run('  MATCH (p:Project) WHERE ID(p) = $id \
             MATCH (p)<-[:UNDER]-(n) \
             MATCH (n)<-[:UNDER]-(n1) \
-            RETURN n, n1', request)
+            RETURN ID(n), ID(n1)', request)
     .then(function(result) {
         jsonData["conns"] = result;
         res.status(200).json(jsonData);
