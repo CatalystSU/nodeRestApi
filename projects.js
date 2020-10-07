@@ -112,17 +112,34 @@ router.get('/temp/:id', (req, res, next) => {
  * Get Project Node via ID
  */
 router.get('/:id', (req, res, next) => {
-    var session = driver.session();
+    var session1 = driver.session();
+    var session2 = driver.session();
+    var viewData = {};
+    var jsonData = {};
     var request = {
         id: Number(req.params.id)
     }
-    session
+    session1
     .run('  MATCH (p:Project) WHERE ID(p) = $id \
             MATCH (p)<-[:UNDER]-(n) \
-            RETURN n, p', request)
+            RETURN n', request)
     .then(function(result) {
-        res.status(200).json(result);
-        session.close();
+        jsonData["tasks"] = result;
+        session1.close();
+    })
+    .catch(function(error) {
+        res.status(404).json({status:"id not found"})
+        console.log(error);
+    });
+    session2
+    .run('  MATCH (p:Project) WHERE ID(p) = $id \
+            MATCH (p)<-[:UNDER]-(n) \
+            MATCH (n)<-[:UNDER]-(n1) \
+            RETURN n, n1', request)
+    .then(function(result) {
+        jsonData["conns"] = result;
+        res.status(200).json(jsonData);
+        session2.close();
     })
     .catch(function(error) {
         res.status(404).json({status:"id not found"})
