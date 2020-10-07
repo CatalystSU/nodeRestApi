@@ -114,6 +114,14 @@ router.get('/temp/:id', (req, res, next) => {
 router.get('/:id', (req, res, next) => {
     var session1 = driver.session();
     var session2 = driver.session();
+    var data = {
+        id:"",
+        task_ob: {
+            tasks: [],
+            cons: []
+        }
+
+    };
     var viewData = {};
     var jsonData = {};
     var request = {
@@ -138,7 +146,7 @@ router.get('/:id', (req, res, next) => {
             RETURN ID(n), ID(n1)', request)
     .then(function(result) {
         jsonData["conns"] = result;
-        res.status(200).json(jsonData);
+        res.status(200).json(data);
         session2.close();
     })
     .catch(function(error) {
