@@ -115,7 +115,7 @@ router.get('/:id', (req, res, next) => {
     var session1 = driver.session();
     var session2 = driver.session();
     var data = {
-        id:"",
+        id: Number(req.params.id),
         task_ob: {
             tasks: [],
             cons: []
@@ -132,6 +132,10 @@ router.get('/:id', (req, res, next) => {
             MATCH (p)<-[:UNDER]-(n) \
             RETURN n', request)
     .then(function(result) {
+        //result.records.forEach(function(record) {
+            //projects.push({name:record.get('n').properties.name, id:record.get('n').identity.low});
+            //console.log(record)
+        //});
         jsonData["tasks"] = result;
         session1.close();
     })
@@ -146,7 +150,7 @@ router.get('/:id', (req, res, next) => {
             RETURN ID(n), ID(n1)', request)
     .then(function(result) {
         jsonData["conns"] = result;
-        res.status(200).json(data);
+        res.status(200).json(jsonData);
         session2.close();
     })
     .catch(function(error) {
