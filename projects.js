@@ -248,13 +248,9 @@ router.get('/:id', (req, res, next) => {
         results[1].records.forEach(function(record) {
             // I will assume even number of entries -> odd + odd = even and even + even = even
             var temp
-            if (count < length/2) {
-                temp = record.get('n').properties
-                data.task_ob.tasks.push(temp);
-            } else {
-                data.task_ob.tasks[count-(length/2)].name = record.get('n').properties.name
-                data.task_ob.tasks[count-(length/2)].task_id = record.get('n').identity.low
-            }
+            temp = record.get('n').properties
+            temp.task_id = record.get('n').identity.low
+            data.task_ob.tasks.push(temp);
             count++;
         });
 
