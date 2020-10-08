@@ -175,6 +175,57 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
+
+
+/**
+ * TODO: THSI MUST GO 
+ */
+/**
+ * Get Project Node via ID
+ */
+router.get('/dev/:id', (req, res, next) => {
+    var session = driver.session();
+    var session1 = driver.session();
+    var session2 = driver.session();
+    var data = {
+        id: Number(req.params.id),
+        task_ob: {
+            tasks: [],
+            cons: []
+        }
+
+    };
+    var viewData = {};
+    var jsonData = {};
+    var request = {
+        id: Number(req.params.id)
+    }
+    Promise.all([
+        session.run('  MATCH (p:Project) WHERE ID(p) = $id \
+            RETURN p', request),
+
+        session1.run('  MATCH (p:Project) WHERE ID(p) = $id \
+            MATCH (p)<-[:UNDER]-(n) \
+            RETURN n', request),
+
+        session2.run('  MATCH (p:Project) WHERE ID(p) = $id \
+            MATCH (p)<-[:UNDER]-(n) \
+            MATCH (n)<-[:UNDER]-(n1) \
+            RETURN ID(n), ID(n1)', request)
+    ])
+    .then(function(results) {
+        jsonData["results"] = results;
+        res.status(200).json(jsonData);
+        session.close();
+        session1.close();
+        session2.close();
+    })
+    .catch(function(error) {
+        res.status(404).json({status:"id not found"})
+        console.log(error);
+    });
+});
+
 /**
  * Update Project node via ID
  */
