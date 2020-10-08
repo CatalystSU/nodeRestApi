@@ -113,7 +113,7 @@ router.get('/temp/:id', (req, res, next) => {
 /**
  * Get Project Node via ID
  */
-router.get('/:id', (req, res, next) => {
+router.get('/dev/:id', (req, res, next) => {
     let x = 0
     var session = driver.session();
     var session1 = driver.session();
@@ -208,7 +208,7 @@ router.get('/:id', (req, res, next) => {
 /**
  * Get Project Node via ID
  */
-router.get('/dev/:id', (req, res, next) => {
+router.get('/:id', (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
