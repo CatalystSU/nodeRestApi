@@ -239,8 +239,33 @@ router.get('/dev/:id', (req, res, next) => {
             RETURN ID(n), ID(n1)', request)
     ])
     .then(function(results) {
+        // set the project name
+        data.name = results[0].records[0].get('p').properties.name
+
+        // get the tasks
+        var length = results[1].records.length;
+        let count = 0;
+        results[1].records.forEach(function(record) {
+            // I will assume even number of entries -> odd + odd = even and even + even = even
+            var temp
+            if (count < length/2) {
+                temp = record.get('n').properties
+                data.task_ob.tasks.push(temp);
+            } else {
+                data.task_ob.tasks[count-(length/2)].name = record.get('n').properties.name
+                data.task_ob.tasks[count-(length/2)].task_id = record.get('n').identity.low
+            }
+            count++;
+        });
+
+        // get connections
+        results[2].records.forEach(function(record) {
+            temp = record._fields
+            data.task_ob.cons.push({"from":temp[0].low,"to":temp[1].low})
+        });
+
         jsonData["results"] = results;
-        res.status(200).json(jsonData);
+        res.status(200).json(data);
         session.close();
         session1.close();
         session2.close();
