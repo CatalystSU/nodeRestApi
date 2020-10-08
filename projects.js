@@ -114,6 +114,7 @@ router.get('/temp/:id', (req, res, next) => {
  * Get Project Node via ID
  */
 router.get('/:id', (req, res, next) => {
+    let x = 0
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
@@ -137,7 +138,7 @@ router.get('/:id', (req, res, next) => {
     .then(function(result) {
         var str
         result.records.forEach(function(record) {
-            str = record.get('p').properties.name;
+            data.name = record.get('p').properties.name;
             //projects.push({name:record.get('n').properties.name, id:record.get('n').identity.low});
             //console.log(record)
         });
@@ -149,8 +150,9 @@ router.get('/:id', (req, res, next) => {
         //console.log(typeof(result.records[0].get('p').properties.name))
         //console.log(result.records[0].get('p'))
         //var str = result.records[0].get('p').properties.name; /************* BEEEEG fucking problem with name  */
-        console.log(str)
-        data.name = str;
+        //data.name = str;
+        console.log("0")
+        x++
         session.close();
     })
     .catch(function(error) {
@@ -168,7 +170,9 @@ router.get('/:id', (req, res, next) => {
             //console.log(record.get('n'))
 
         //});
+        console.log("1")
         jsonData["tasks"] = result;
+        x++
         session1.close();
     })
     .catch(function(error) {
@@ -182,13 +186,18 @@ router.get('/:id', (req, res, next) => {
             RETURN ID(n), ID(n1)', request)
     .then(function(result) {
         jsonData["conns"] = result;
-        res.status(200).json(data);
+        console.log("2")
+        x++
         session2.close();
     })
     .catch(function(error) {
         res.status(404).json({status:"id not found"})
         console.log(error);
     });
+    //while (x != 3) {
+        //console.log("poes")
+    //}
+    res.status(200).json(data);
 });
 
 /**
