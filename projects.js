@@ -3,6 +3,8 @@ const { create } = require('domain');
 const router = express.Router();
 
 var driver = require('./neo4j');
+const { waitForDebugger } = require('inspector');
+const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 
 /**
  * Create Project node, auto assigned ID
@@ -116,13 +118,14 @@ router.get('/:id', (req, res, next) => {
     var session1 = driver.session();
     var session2 = driver.session();
     var data = {
+        name: '',
         id: Number(req.params.id),
         task_ob: {
             tasks: [],
             cons: []
         }
-
     };
+    //data.name = `poes`;
     var viewData = {};
     var jsonData = {};
     var request = {
@@ -132,11 +135,22 @@ router.get('/:id', (req, res, next) => {
     .run('  MATCH (p:Project) WHERE ID(p) = $id \
             RETURN p', request)
     .then(function(result) {
-        //result.records.forEach(function(record) {
+        var str
+        result.records.forEach(function(record) {
+            str = record.get('p').properties.name;
             //projects.push({name:record.get('n').properties.name, id:record.get('n').identity.low});
             //console.log(record)
-        //});
-        jsonData["name"] = result;
+        });
+        //result.records[0].get('x')
+        //jsonData["name"] = result.records[0].get('p'); //.records[0]
+        //console.log(result.records[0].get('p').properties.name)
+        //data["name"] = result.records[0].get('p').properties.name
+        //data.name = result.records[0].get('p').properties.name;
+        //console.log(typeof(result.records[0].get('p').properties.name))
+        //console.log(result.records[0].get('p'))
+        //var str = result.records[0].get('p').properties.name; /************* BEEEEG fucking problem with name  */
+        console.log(str)
+        data.name = str;
         session.close();
     })
     .catch(function(error) {
@@ -151,6 +165,8 @@ router.get('/:id', (req, res, next) => {
         //result.records.forEach(function(record) {
             //projects.push({name:record.get('n').properties.name, id:record.get('n').identity.low});
             //console.log(record)
+            //console.log(record.get('n'))
+
         //});
         jsonData["tasks"] = result;
         session1.close();
@@ -166,7 +182,7 @@ router.get('/:id', (req, res, next) => {
             RETURN ID(n), ID(n1)', request)
     .then(function(result) {
         jsonData["conns"] = result;
-        res.status(200).json(jsonData);
+        res.status(200).json(data);
         session2.close();
     })
     .catch(function(error) {
