@@ -7,52 +7,13 @@ var driver = require('./neo4j');
 /**
  * Create Task node
  */
-router.post('/dev/create', (req, res, next) => {
-    var session = driver.session();
-    var request = {
-        project_id: req.body.project_id,
-        taskname: req.body.taskname,
-        personincharge: req.body.personincharge,
-        packagemanager: req.body.packagemanager,
-        startdate: req.body.startdate,
-        duration: req.body.duration,
-        enddate: req.body.enddate,
-        taskresources: req.body.taskresources,
-        taskprogress: req.body.taskprogress
-    }
-    session
-    .run('MATCH (p:Project) WHERE ID(p) = $project_id\
-        CREATE (t:Task {\
-        taskname:$taskname, \
-        personincharge:$personincharge, \
-        packagemanager:$packagemanager, \
-        startdate: $startdate, \
-        duration:$duration, \
-        enddate:$enddate, \
-        taskresources:$taskresources, \
-        taskprogress:$taskprogress}) \
-        CREATE (t)-[:UNDER {task_id:[ID(t)]}]->(p)', request)
-    .then(function(result) {
-        res.status(200).json(result);
-        result.records.forEach(function(record) {
-            console.log(record.get('title'))
-            console.log(record)
-        });
-        session.close();
-    })
-    .catch(function(error) {
-        res.status(500).json({status:"Cannot create task"})
-        console.log(error);
-    });
-});
-
 router.post('/create', (req, res, next) => {
     var session = driver.session();
     var request = {
         project_id: req.body.project_id,
         taskname: req.body.taskname,
         personincharge: req.body.personincharge,
-        packagemanager: req.body.packagemanager,
+        packagemanager: req.body.packagemangaer,
         startdate: req.body.startdate,
         duration: req.body.duration,
         enddate: req.body.enddate,
