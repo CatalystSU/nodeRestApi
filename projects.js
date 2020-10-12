@@ -178,24 +178,25 @@ router.get('/:id', (req, res, next) => {
 });
 
 /**
- * Update Project node via ID
+ * Get all tasks with given resource
  */
-router.post('/resources/:id', (req, res, next) => {
+router.post('/resources', (req, res, next) => {
     var session = driver.session();
     var request = {
-        id: Number(req.params.id),
-        name: req.body.name
+        id: Number(req.body.project_id),
+        resource: req.body.taskresource
     }
     session
     .run('  MATCH (p:Project) WHERE ID(p) = $id \
             MATCH (p)<-[:UNDER]-(n) \
-            RETURN n', request)
+            WHERE n.taskresources CONTAINS $resource \
+            RETURN ID(n)', request)
     .then(function(result) {
-        res.status(200).json({name:result.records[0].get('x').properties.name, id:result.records[0].get('x').identity.low});
+        res.status(200).json(result);
         session.close();
     })
     .catch(function(error) {
-        res.status(500).json({status:"Cannot Update project"})
+        res.status(500).json({status:"Connot get tasks"})
         console.log(error);
     });
     
