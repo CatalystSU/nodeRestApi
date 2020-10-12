@@ -275,6 +275,30 @@ router.get('/:id', (req, res, next) => {
 /**
  * Update Project node via ID
  */
+router.post('/resources/:id', (req, res, next) => {
+    var session = driver.session();
+    var request = {
+        id: Number(req.params.id),
+        name: req.body.name
+    }
+    session
+    .run('  MATCH (p:Project) WHERE ID(p) = $id \
+            MATCH (p)<-[:UNDER]-(n) \
+            RETURN n', request)
+    .then(function(result) {
+        res.status(200).json({name:result.records[0].get('x').properties.name, id:result.records[0].get('x').identity.low});
+        session.close();
+    })
+    .catch(function(error) {
+        res.status(500).json({status:"Cannot Update project"})
+        console.log(error);
+    });
+    
+});
+
+/**
+ * Update Project node via ID
+ */
 router.post('/update/:id', (req, res, next) => {
     var session = driver.session();
     var request = {
