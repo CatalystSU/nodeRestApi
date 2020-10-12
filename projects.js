@@ -181,6 +181,7 @@ router.get('/:id', (req, res, next) => {
  * Get all tasks with given resource
  */
 router.post('/resources', (req, res, next) => {
+    var tasks = []
     var session = driver.session();
     var request = {
         id: Number(req.body.project_id),
@@ -192,14 +193,17 @@ router.post('/resources', (req, res, next) => {
             WHERE n.taskresources CONTAINS $resource \
             RETURN ID(n)', request)
     .then(function(result) {
-        res.status(200).json(result);
+        // get resources
+        result.records.forEach(function(record) {
+            tasks.push(record.get('ID(n)').low)
+        });
+        res.status(200).json(tasks);
         session.close();
     })
     .catch(function(error) {
         res.status(500).json({status:"Connot get tasks"})
         console.log(error);
     });
-    
 });
 
 /**
