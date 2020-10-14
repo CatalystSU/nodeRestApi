@@ -6,6 +6,10 @@ var driver = require('./neo4j');
 const { waitForDebugger } = require('inspector');
 const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 
+router.post('/upload', (req, res, next) => {
+    res.status(200).json({"bruh":"bruh"});
+});
+
 /**
  * Create Project node, auto assigned ID
  */
