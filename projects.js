@@ -330,7 +330,7 @@ function bellman(start, distance, pre, graph, nodes) {
     var min = Infinity
     graph.forEachNode((node) => {
         //console.log(node)
-        distance[node] = Infinity
+        distance[node] = -1
         pre[node] = null
         if (parseInt(node) > max) {
             max = node
@@ -344,7 +344,7 @@ function bellman(start, distance, pre, graph, nodes) {
     //console.log(max)
 
     // look for source
-    distance[min] = 0
+    distance[parseInt(min)] = 0
 
     for (var i = parseInt(min); i <= parseInt(max); i++) {
         //console.log("bruh")
@@ -353,7 +353,7 @@ function bellman(start, distance, pre, graph, nodes) {
             //console.log(distance[i])
             graph.forEachEdge((edge, attributes, source, target, sourceAttributes, targetAttributes) => {
                 if (source == i) {
-                    if (distance[parseInt(source,10)] + 1 < distance[parseInt(target,10)]) {
+                    if (distance[parseInt(source,10)] + 1 > distance[parseInt(target,10)]) {
                         distance[parseInt(target,10)] = distance[parseInt(source,10)]+1
                         pre[parseInt(target,10)] = parseInt(source, 10);
                     }
