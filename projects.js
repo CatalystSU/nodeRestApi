@@ -281,13 +281,16 @@ router.get('/critical/:id', (req, res, next) => {
         var i;
         var nodes = [];
         // add nodes to graph
+        //console.log(data.task_ob.tasks)
         for (i = 0; i < data.task_ob.tasks.length; i++) {
             graph.addNode(data.task_ob.tasks[i].task_id);
+            console.log(data.task_ob.tasks[i].task_id)
             //nodes.push(data.task_ob.tasks[i].task_id)
         }
 
         var j;
         // add connections to graph
+        //console.log(data.task_ob.tasks)
         for (j = 0; j < data.task_ob.cons.length; j++) {
             graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to);
         }
@@ -307,8 +310,8 @@ router.get('/critical/:id', (req, res, next) => {
         //const path = dijkstra.bidirectional(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
         //const path = shortestPath(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
         //console.log(paths)
-        //console.log('Number of nodes', graph.order);
-        //console.log('Number of edges', graph.size);
+        console.log('Number of nodes', graph.order);
+        console.log('Number of edges', graph.size);
         //console.log(path)'
 
         res.status(200).json(nodes);
@@ -326,22 +329,27 @@ function bellman(start, distance, pre, graph, nodes) {
     var max = 0
     var min = Infinity
     graph.forEachNode((node) => {
+        //console.log(node)
         distance[node] = Infinity
         pre[node] = null
-        if (node > max) {
+        if (parseInt(node) > max) {
             max = node
         }
-        if (node < min) {
+        if (parseInt(node) < min) {
             min = node
         }
     });
-    console.log(min)
-    console.log(max)
 
+    //console.log(min)
+    //console.log(max)
+
+    // look for source
     distance[min] = 0
 
-    for (var i = min; i <= max; i++) {
+    for (var i = parseInt(min); i <= parseInt(max); i++) {
+        //console.log("bruh")
         if (distance[i] != null) {
+            //console.log("bruh")
             //console.log(distance[i])
             graph.forEachEdge((edge, attributes, source, target, sourceAttributes, targetAttributes) => {
                 if (source == i) {
@@ -349,7 +357,7 @@ function bellman(start, distance, pre, graph, nodes) {
                         distance[parseInt(target,10)] = distance[parseInt(source,10)]+1
                         pre[parseInt(target,10)] = parseInt(source, 10);
                     }
-                    console.log(`Edge from ${source} to ${target}`);
+                    //console.log(`Edge from ${source} to ${target}`);
                 }
             });
         }
@@ -357,12 +365,14 @@ function bellman(start, distance, pre, graph, nodes) {
         //Do something
     }
     //var nodies = []
-    for (var i = min; i <= max; i++) {
+    for (var i = parseInt(min); i <= parseInt(max); i++) {
         if (pre[i]!=null) {
-            console.log("i")
-            console.log(i)
-            console.log("pre[i]")
-            console.log(pre[i])
+            //console.log("i")
+            //console.log(i)
+            //console.log("pre[i]")
+            //console.log(pre[i])
+            //remove dups
+            nodes.push(i)
             nodes.push(pre[i])
         }
     }
