@@ -65,7 +65,6 @@ router.post('/create', (req, res, next) => {
         res.status(500).json({status:"Cannot create project"})
         console.log(error);
     });
-    
 });
 
 /**
@@ -147,9 +146,6 @@ router.get('/temp/:id', (req, res, next) => {
     };
 });
 
-
-
-
 /**
  * Get Project Node via ID
  */
@@ -157,6 +153,7 @@ router.get('/:id', (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
+    var idd = req.params.id
     var data = {
         id: Number(req.params.id),
         task_ob: {
@@ -197,7 +194,6 @@ router.get('/:id', (req, res, next) => {
             if (record.get('n').properties.taskprogress.low != null) {
                 temp.taskprogress = record.get('n').properties.taskprogress.low
             }
-            console.log(record.get('n').properties)
             temp.task_id = record.get('n').identity.low
             data.task_ob.tasks.push(temp);
             count++;
@@ -211,6 +207,7 @@ router.get('/:id', (req, res, next) => {
 
         jsonData["results"] = results;
         res.status(200).json(data);
+
         session.close();
         session1.close();
         session2.close();
@@ -220,6 +217,98 @@ router.get('/:id', (req, res, next) => {
         console.log(error);
     });
 });
+router.get('/devvy/:id', (req, res, next) => {
+    var idd = req.params.id
+    var viewData = {};
+    var jsonData = {};
+    var request = {
+        id: Number(req.params.id)
+    }
+
+    getProject(idd)
+    .then(function(result) {
+        res.status(200).json(result);
+    })
+    .catch(function(error) {
+        res.status(404).json({status:"id not found"})
+        console.log(error);
+    });
+
+});
+
+function getProject(id) {
+    return new Promise(function(resolve, reject) {
+        var session = driver.session();
+        var session1 = driver.session();
+        var session2 = driver.session();
+        var data = {
+            id: Number(id),
+            task_ob: {
+                tasks: [],
+                cons: []
+            }
+
+        };
+        var viewData = {};
+        var jsonData = {};
+        var request = {
+            id: Number(id)
+        }
+        Promise.all([
+            session.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                RETURN p', request),
+
+            session1.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                MATCH (p)<-[:UNDER]-(n) \
+                RETURN n', request),
+
+            session2.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                MATCH (p)<-[:UNDER]-(n) \
+                MATCH (n)<-[:UNDER]-(n1) \
+                RETURN ID(n), ID(n1)', request)
+        ])
+        .then(function(results) {
+            // set the project name
+            data.name = results[0].records[0].get('p').properties.name
+
+            // get the tasks
+            var length = results[1].records.length;
+            let count = 0;
+            results[1].records.forEach(function(record) {
+                // I will assume even number of entries -> odd + odd = even and even + even = even
+                var temp
+                temp = record.get('n').properties
+                if (record.get('n').properties.taskprogress.low != null) {
+                    temp.taskprogress = record.get('n').properties.taskprogress.low
+                }
+                //console.log(record.get('n').properties)
+                temp.task_id = record.get('n').identity.low
+                data.task_ob.tasks.push(temp);
+                count++;
+            });
+
+            // get connections
+            results[2].records.forEach(function(record) {
+                temp = record._fields
+                data.task_ob.cons.push({"from":temp[1].low,"to":temp[0].low})
+            });
+
+            jsonData["results"] = results;
+            //res.status(200).json(data);
+            //console.log(data)
+            session.close();
+            session1.close();
+            session2.close();
+            console.log(data)
+            resolve(data)
+        })
+        .catch(function(error) {
+            //res.status(404).json({status:"id not found"})
+            reject(error)
+            console.log(error);
+        });
+    });
+}
 
 
 
@@ -286,32 +375,21 @@ router.get('/critical/:id', (req, res, next) => {
         // add nodes to graph
         for (i = 0; i < data.task_ob.tasks.length; i++) {
             graph.addNode(data.task_ob.tasks[i].task_id);
-            //nodes.push({"node":data.task_ob.tasks[i].task_id,"dur":data.task_ob.tasks[i].task_id})
             var test = getDatum(data.task_ob.tasks[i].duration)
-            //console.log(test)
-            nodes[data.task_ob.tasks[i].task_id] = test//getDatum(data.task_ob.tasks[i].duration)
+            nodes[data.task_ob.tasks[i].task_id] = test
         }
-        //console.log(nodes)
+
         var j;
-        // add connections to graph
-        var e
-        var weight
-        //duration
         for (j = 0; j < data.task_ob.cons.length; j++) {
-            //weight = 
-            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: nodes[data.task_ob.cons[j].from]});
+            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: nodes[data.task_ob.cons[j].from]}); //TODO: switch to and from
             console.log(nodes[data.task_ob.cons[j].from])
         }
-        var bruh = getDatum("1 day(s)")
-        //console.log(bruh)
-        // depth first exhaustive
-        //console.log(graph.outNeighbors("47"))
+
         best = []
         bestW = -Infinity;
         current = [];
         currentW = 0;
 		graph.forEachNode(function(node) {
-			//When the node is a start node
 			if (graph.inNeighbors(node).length == 0) {
                 current.push(parseInt(node));
                 depthFirstSearch(node, graph);
@@ -338,9 +416,7 @@ function depthFirstSearch(node, graph) {
 	var isEnd = true;
 	graph.outNeighbors(node).forEach(function(child) {
         var w = parseInt(graph.getEdgeAttribute(node, child, 'weight'));
-        //console.log(w)
         currentW += w;
-        //console.log(child)
 		current.push(parseInt(child));
 		depthFirstSearch(child, graph);
 		current.pop(child);
@@ -353,8 +429,6 @@ function depthFirstSearch(node, graph) {
         for (let i = 0; i < current.length; i++) {
             best.push(parseInt(current[i]))
         }
-		//best = current;
-		//currentW = [];
 	}
 }
 
@@ -428,7 +502,6 @@ router.post('/update/:id', (req, res, next) => {
         res.status(500).json({status:"Cannot Update project"})
         console.log(error);
     });
-    
 });
 
 /**
