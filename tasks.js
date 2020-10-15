@@ -3,6 +3,8 @@ const { create } = require('domain');
 const router = express.Router();
 
 var driver = require('./neo4j');
+const e = require('express');
+const { start } = require('repl');
 
 /**
  * Create Task node
@@ -52,10 +54,30 @@ router.post('/create', (req, res, next) => {
  */
 function verify(project) {
     cons = project.cons;
-    for (let i = 0; i < cons.length; i++) {
-        const con = cons[i];
-        
+    tasks = project.tasks;
+    var updated = true;
+    while (updated) {
+        updated = false;
+        for (let i = 0; i < cons.length; i++) {
+            const con = cons[i];
+            var from = tasks[getTaskIndex(tasks, con.from)];
+            var to = tasks[getTaskIndex(tasks, con.to)];
+            if (from.enddate != getDate(from.startdate, from.duration)) {
+                from.enddate = getDate(from.startdate, from.duration);
+                updated = true;
+            }
+            if (to.startdate != from.enddate) {
+                to.startdate = from.enddate;
+                updated = true;
+            }
+            if (to.enddate != getDate(to.startdate, to.duration)) {
+                to.enddate = getDate(to.startdate, to.duration);
+                updated = true;
+            }
+        }
+        console.log(project);
     }
+    return project;
 }
 
 /**
@@ -75,53 +97,43 @@ function getTaskIndex(tasks, task_id) {
 }
 
 /**
- * Get end date from given start date and duration. TODO:
+ * Get end date from given start date and duration.
  * @param {String} date 
  * @param {String} duration 
  */
-function findDate(date, duration) {
+function getDate(date, duration) {
+    /* Splitting the date string */
     var sections = date.split("/");
-    start = new Date(sections[2], sections[1], sections[0], 0, 0, 0, 0);
-    console.log(start.getFullYear());
+    /* Creating date based off of strings, date index by 0 */
+    var start = new Date(sections[2], sections[1]-1, sections[0], 0, 0, 0, 0);
+
+    /* Find correct amount of days */
+    var amount =  parseInt(duration.split(" ")[0]);
+    var unit = duration.split(" ")[1];
+    if (unit == "days") {
+        console.log("Days");
+        start.setDate(start.getDate() + amount);
+    } else if (unit == "weeks") {
+        console.log("Weeks");
+        start.setDate(start.getDate() + (amount * 7));
+    } else if (unit == "months") {
+        console.log("Months");
+        start.setMonth(start.getMonth() + amount);
+    } else {
+        console.log("findDate: Unit not recognised")
+    }
+    return "" + start.getDate() + "/" + (start.getMonth() + 1) + "/" + start.getFullYear();
 }
 
 /**
  * Create link between tasks
  */
 router.post('/dev/link', (req, res, next) => {
-    var session = driver.session();
-    var request = {
-        task_id1: req.body.task_id2,
-        task_id2: req.body.task_id1
-    };
-    session
-    .run('MATCH (t1:Task) WHERE ID(t1) = $task_id1\
-        MATCH (t2:Task) WHERE ID(t2) = $task_id2\
-        return t1, t2', request)
-    .then(function(result) {
-        
-        try {
-            for (let i = 0; i < result.records.length; i++) {
-                const element = result.records[i];
-                findDate(element._fields[0].properties.startdate);
-            }
-            res.status(200).json(result);
-            session.close();
-            return;
-        } catch (error) {
-            res.status(500).json({
-                message:"Couldnt try",
-                error:error
-            });
-            session.close();
-            return;
-        }
-        
-    })
-    .catch(function(error) {
-        res.status(500).json({status:"Cannot create Link"});
-        console.log(error);
-    });
+    try {
+        res.status(200).json(verify(req.body));
+    } catch (error) {
+        res.status(500).json(error);
+    }
 });
 
 /**
@@ -155,16 +167,31 @@ router.post('/link', (req, res, next) => {
 /**
  * Update Task node via ID
  */
-router.post('/update/:id', (req, res, next) => {
+router.post('/update', (req, res, next) => {
     var session = driver.session();
     var request = {
-        id: Number(req.params.id),
-        name: req.body.name
+        id: req.body.task_id,
+        taskname: req.body.taskname,
+        personincharge: req.body.personincharge,
+        packagemanager: req.body.packagemanager,
+        startdate: req.body.startdate,
+        duration: req.body.duration,
+        enddate: req.body.enddate,
+        taskresources: req.body.taskresources,
+        taskprogress: req.body.taskprogress
     }
     session
-    .run('MATCH (p:Task) WHERE ID(p) = $id UNWIND p as x SET x = {name:$name} RETURN x', request)
+    .run('MATCH (p:Task) WHERE ID(p) = $id UNWIND p as x SET x = { \
+                taskname:$taskname, \
+                personincharge:$personincharge, \
+                packagemanager:$packagemanager, \
+                startdate: $startdate, \
+                duration:$duration, \
+                enddate:$enddate, \
+                taskresources:$taskresources, \
+                taskprogress:$taskprogress}', request)
     .then(function(result) {
-        res.status(200).json({name:result.records[0].get('x').properties.name, id:result.records[0].get('x').identity.low});
+        res.status(200).json({status:"Update Successful"});
         session.close();
     })
     .catch(function(error) {
