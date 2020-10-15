@@ -283,9 +283,8 @@ router.get('/critical/:id', (req, res, next) => {
             graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to);
         }
 
-
         // Returning every shortest path between source & every node of the graph
-        //const paths = undirectedSingleSource(graph, data.task_ob.tasks[0].task_id);
+        //const paths = undirectedSingleSourceLength(graph, data.task_ob.tasks[0].task_id);
         //const paths = dijkstra.singleSource(graph, data.task_ob.tasks[0].task_id);
         //const path = dijkstra.bidirectional(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
         //const path = shortestPath(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
