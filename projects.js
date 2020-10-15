@@ -3,12 +3,15 @@ const { create } = require('domain');
 const router = express.Router();
 
 var driver = require('./neo4j');
+const Graph = require('graphology');
+const shortestPath = require('graphology-shortest-path/unweighted');
+var {undirectedSingleSourceLength} = require('graphology-shortest-path/unweighted');
+var {dijkstra} = require('graphology-shortest-path');
 const { waitForDebugger } = require('inspector');
 const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 
 router.post('/upload', (req, res, next) => {
     var session = driver.session();
-    
     var request = "";
     request += `CREATE (p:Project {name:"${req.body.project_name}"})`;
     for (let index = 0; index < req.body.tasks.length; index++) {
@@ -210,6 +213,126 @@ router.get('/:id', (req, res, next) => {
         console.log(error);
     });
 });
+
+router.get('/critical/:id', (req, res, next) => {
+    var session = driver.session();
+    var session1 = driver.session();
+    var session2 = driver.session();
+
+    var data = {
+        id: Number(req.params.id),
+        task_ob: {
+            tasks: [],
+            cons: []
+        }
+
+    };
+    var viewData = {};
+    var jsonData = {};
+    var request = {
+        id: Number(req.params.id)
+    }
+    Promise.all([
+        session.run('  MATCH (p:Project) WHERE ID(p) = $id \
+            RETURN p', request),
+
+        session1.run('  MATCH (p:Project) WHERE ID(p) = $id \
+            MATCH (p)<-[:UNDER]-(n) \
+            RETURN n', request),
+
+        session2.run('  MATCH (p:Project) WHERE ID(p) = $id \
+            MATCH (p)<-[:UNDER]-(n) \
+            MATCH (n)<-[:UNDER]-(n1) \
+            RETURN ID(n), ID(n1)', request)
+    ])
+    .then(function(results) {
+        // set the project name
+        data.name = results[0].records[0].get('p').properties.name
+
+        // get the tasks
+        var length = results[1].records.length;
+        let count = 0;
+        results[1].records.forEach(function(record) {
+            // I will assume even number of entries -> odd + odd = even and even + even = even
+            var temp
+            temp = record.get('n').properties
+            temp.task_id = record.get('n').identity.low
+            data.task_ob.tasks.push(temp);
+            count++;
+        });
+
+        // get connections
+        results[2].records.forEach(function(record) {
+            temp = record._fields
+            data.task_ob.cons.push({"from":temp[0].low,"to":temp[1].low})
+        });
+
+        jsonData["results"] = results;
+
+        // bruh momento start the algo
+        const graph = new Graph();
+        var i;
+        // add nodes to graph
+        for (i = 0; i < data.task_ob.tasks.length; i++) {
+            graph.addNode(data.task_ob.tasks[i].task_id);
+        }
+
+        var j;
+        // add connections to graph
+        for (j = 0; j < data.task_ob.cons.length; j++) {
+            graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to);
+        }
+
+
+        // Returning every shortest path between source & every node of the graph
+        //const paths = undirectedSingleSource(graph, data.task_ob.tasks[0].task_id);
+        //const paths = dijkstra.singleSource(graph, data.task_ob.tasks[0].task_id);
+        //const path = dijkstra.bidirectional(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
+        //const path = shortestPath(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
+        //console.log(paths)
+        //console.log('Number of nodes', graph.order);
+        //console.log('Number of edges', graph.size);
+        //console.log(path)
+
+        res.status(200).json(data);
+        session.close();
+        session1.close();
+        session2.close();
+    })
+    .catch(function(error) {
+        res.status(404).json({status:"id not found"})
+        console.log(error);
+    });
+});
+
+function djikstraAlgorithm(startNode) {
+    let distances = {};
+    // Stores the reference to previous nodes
+    let prev = {};
+    let pq = new PriorityQueue(this.nodes.length * this.nodes.length);
+    // Set distances to all nodes to be infinite except startNode
+    distances[startNode] = 0;
+    pq.enqueue(startNode, 0);
+    this.nodes.forEach(node => {
+       if (node !== startNode) distances[node] = Infinity;
+       prev[node] = null;
+    });
+
+    while (!pq.isEmpty()) {
+       let minNode = pq.dequeue();
+       let currNode = minNode.data;
+       let weight = minNode.priority;
+       this.edges[currNode].forEach(neighbor => {
+          let alt = distances[currNode] + neighbor.weight;
+          if (alt < distances[neighbor.node]) {
+             distances[neighbor.node] = alt;
+             prev[neighbor.node] = currNode;
+             pq.enqueue(neighbor.node, distances[neighbor.node]);
+          }
+       });
+    }
+    return distances;
+}
 
 /**
  * Get all tasks with given resource
