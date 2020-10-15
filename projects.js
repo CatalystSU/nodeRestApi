@@ -32,7 +32,7 @@ router.post('/upload', (req, res, next) => {
     session
     .run(request)
     .then(function(result) {
-        res.status(200).json(result);
+        res.status(200).json("Project Uploaded");
     })
     .catch(function(error) {
         res.status(500).json({status:"Cannot create project"})
