@@ -34,7 +34,7 @@ router.post('/create', (req, res, next) => {
                             email: req.body.email,
                             username: req.body.firstname
                         },
-                        process.env.JWT_KEY, 
+                        process.env.JWT_KEY,
                         {
                             expiresIn: "2h"
                         }
