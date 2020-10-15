@@ -291,7 +291,7 @@ router.get('/critical/:id', (req, res, next) => {
         //console.log(paths)
         //console.log('Number of nodes', graph.order);
         //console.log('Number of edges', graph.size);
-        //console.log(path)
+        //console.log(path)'
 
         res.status(200).json(data);
         session.close();
