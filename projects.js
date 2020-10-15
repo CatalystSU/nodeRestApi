@@ -191,6 +191,10 @@ router.get('/:id', (req, res, next) => {
             // I will assume even number of entries -> odd + odd = even and even + even = even
             var temp
             temp = record.get('n').properties
+            if (record.get('n').properties.taskprogress.low != null) {
+                temp.taskprogress = record.get('n').properties.taskprogress.low
+            }
+            console.log(record.get('n').properties)
             temp.task_id = record.get('n').identity.low
             data.task_ob.tasks.push(temp);
             count++;
@@ -272,9 +276,11 @@ router.get('/critical/:id', (req, res, next) => {
         // bruh momento start the algo
         const graph = new Graph();
         var i;
+        var nodes = [];
         // add nodes to graph
         for (i = 0; i < data.task_ob.tasks.length; i++) {
             graph.addNode(data.task_ob.tasks[i].task_id);
+            nodes.push(data.task_ob.tasks[i].task_id)
         }
 
         var j;
@@ -291,7 +297,7 @@ router.get('/critical/:id', (req, res, next) => {
         //console.log(paths)
         //console.log('Number of nodes', graph.order);
         //console.log('Number of edges', graph.size);
-        //console.log(path)
+        //console.log(path)'
 
         res.status(200).json(data);
         session.close();
