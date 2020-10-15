@@ -281,32 +281,24 @@ router.get('/critical/:id', (req, res, next) => {
         var i;
         var nodes = [];
         // add nodes to graph
-        //console.log(data.task_ob.tasks)
         for (i = 0; i < data.task_ob.tasks.length; i++) {
             graph.addNode(data.task_ob.tasks[i].task_id);
-            console.log(data.task_ob.tasks[i].task_id)
-            //nodes.push(data.task_ob.tasks[i].task_id)
         }
 
         var j;
         // add connections to graph
-        //console.log(data.task_ob.tasks)
         var e
         for (j = 0; j < data.task_ob.cons.length; j++) {
             e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: 1});
-            console.log(graph.isDirected(e));
         }
 
-        // GET THE SOURCE NODE
-        var distance = [];
-        var pre = [];
-        //bellman(data.task_ob.tasks[0].task_id, distance, pre, graph, nodes)
-        const path = dijkstra.singleSource(graph, "48");
+        // depth first exhaustive
+        console.log(graph.outNeighbors("47"))
 
-        console.log('Number of nodes', graph.order);
-        console.log('Number of edges', graph.size);
-
-        res.status(200).json(path);
+        graph.outNeighbors("47").forEach(function(record) {
+            console.log(record)
+        });
+        res.status(200).json(graph.toJSON());
         session.close();
         session1.close();
         session2.close();
@@ -316,49 +308,6 @@ router.get('/critical/:id', (req, res, next) => {
         console.log(error);
     });
 });
-
-function bellman(start, distance, pre, graph, nodes) {
-    var max = 0
-    var min = Infinity
-    graph.forEachNode((node) => {
-        //console.log(node)
-        distance[node] = Infinity
-        pre[node] = null
-        if (parseInt(node) > max) {
-            max = node
-        }
-        if (parseInt(node) < min) {
-            min = node
-        }
-    });
-
-    // look for source
-    distance[parseInt(min)] = 0
-    for (var i = parseInt(min); i < parseInt(max); i++) {
-        if (distance[i] != null) {
-            graph.forEachEdge((edge, attributes, source, target, sourceAttributes, targetAttributes) => {
-                if (source == i) {
-                    if (distance[parseInt(source,10)] + 1 < distance[parseInt(target,10)]) {
-                        distance[parseInt(target,10)] = distance[parseInt(source,10)]+1
-                        pre[parseInt(target,10)] = parseInt(source, 10);
-                    }
-                    //console.log(`Edge from ${source} to ${target}`);
-                }
-            });
-        }
-    }
-    for (var i = parseInt(min); i <= parseInt(max); i++) {
-        if (pre[i]!=null) {
-            console.log("i")
-            console.log(i)
-            console.log("pre[i]")
-            console.log(pre[i])
-            //remove dups
-            nodes.push(i)
-            nodes.push(pre[i])
-        }
-    }
-}
 
 /**
  * Get all tasks with given resource
