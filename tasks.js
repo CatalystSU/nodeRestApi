@@ -51,8 +51,8 @@ router.post('/create', (req, res, next) => {
 router.post('/link', (req, res, next) => {
     var session = driver.session();
     var request = {
-        task_id1: req.body.task_id1,
-        task_id2: req.body.task_id2
+        task_id1: req.body.task_id2,
+        task_id2: req.body.task_id1
     };
     session
     .run('MATCH (t1:Task) WHERE ID(t1) = $task_id1\

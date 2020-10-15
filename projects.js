@@ -29,7 +29,7 @@ router.post('/upload', (req, res, next) => {
     };
     for (let index = 0; index < req.body.cons.length; index++) {
         const con = req.body.cons[index];
-        request += `CREATE (t${con.to})-[:UNDER]->(t${con.from})`;
+        request += `CREATE (t${con.from})-[:UNDER]->(t${con.to})`;
     };
 
     session
@@ -199,7 +199,7 @@ router.get('/:id', (req, res, next) => {
         // get connections
         results[2].records.forEach(function(record) {
             temp = record._fields
-            data.task_ob.cons.push({"from":temp[0].low,"to":temp[1].low})
+            data.task_ob.cons.push({"from":temp[1].low,"to":temp[0].low})
         });
 
         jsonData["results"] = results;
