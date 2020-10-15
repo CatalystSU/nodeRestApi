@@ -221,6 +221,27 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
+function getDatum(str) {
+    var sections = date.split("/");
+    /* Creating date based off of strings, date index by 0 */
+    var datum = new Date(1970, 0, 1, 0, 0, 0, 0);
+
+    var amount =  parseInt(str.split(" ")[0]);
+    var unit = str.split(" ")[1];
+    if (unit == "day(s)") {
+        datum.setDate(amount)
+    } else if (unit == "week(s)") {
+        datum.setDate(amount*7)
+    } else if (unit == "month(s)") {
+        datum.setMonth(amount)
+    } else {
+        console.log("BRUH MOMENT");
+    }
+
+    return datum.getTime();
+}
+
+
 router.get('/critical/:id', (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
@@ -294,7 +315,6 @@ router.get('/critical/:id', (req, res, next) => {
 
         // depth first exhaustive
         console.log(graph.outNeighbors("47"))
-
         graph.outNeighbors("47").forEach(function(record) {
             console.log(record)
         });
