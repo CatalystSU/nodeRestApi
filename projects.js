@@ -147,6 +147,9 @@ router.get('/temp/:id', (req, res, next) => {
     };
 });
 
+
+
+
 /**
  * Get Project Node via ID
  */
@@ -278,16 +281,28 @@ router.get('/critical/:id', (req, res, next) => {
         var i;
         var nodes = [];
         // add nodes to graph
+        //console.log(data.task_ob.tasks)
         for (i = 0; i < data.task_ob.tasks.length; i++) {
             graph.addNode(data.task_ob.tasks[i].task_id);
-            nodes.push(data.task_ob.tasks[i].task_id)
+            console.log(data.task_ob.tasks[i].task_id)
+            //nodes.push(data.task_ob.tasks[i].task_id)
         }
 
         var j;
         // add connections to graph
+        //console.log(data.task_ob.tasks)
         for (j = 0; j < data.task_ob.cons.length; j++) {
-            graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to);
+            graph.addEdge(data.task_ob.cons[j].to, data.task_ob.cons[j].from);
         }
+
+        // GET THE SOURCE NODE
+        var distance = [];
+        var pre = [];
+        bellman(data.task_ob.tasks[0].task_id, distance, pre, graph, nodes)
+
+        //console.log(pre[0])
+        //distance[123] = 45
+        //console.log(distance[123])
 
         // Returning every shortest path between source & every node of the graph
         //const paths = undirectedSingleSourceLength(graph, data.task_ob.tasks[0].task_id);
@@ -295,8 +310,8 @@ router.get('/critical/:id', (req, res, next) => {
         //const path = dijkstra.bidirectional(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
         //const path = shortestPath(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
         //console.log(paths)
-        //console.log('Number of nodes', graph.order);
-        //console.log('Number of edges', graph.size);
+        console.log('Number of nodes', graph.order);
+        console.log('Number of edges', graph.size);
         //console.log(path)'
 
         res.status(200).json(nodes);
@@ -310,33 +325,63 @@ router.get('/critical/:id', (req, res, next) => {
     });
 });
 
-function djikstraAlgorithm(startNode) {
-    let distances = {};
-    // Stores the reference to previous nodes
-    let prev = {};
-    let pq = new PriorityQueue(this.nodes.length * this.nodes.length);
-    // Set distances to all nodes to be infinite except startNode
-    distances[startNode] = 0;
-    pq.enqueue(startNode, 0);
-    this.nodes.forEach(node => {
-       if (node !== startNode) distances[node] = Infinity;
-       prev[node] = null;
+function bellman(start, distance, pre, graph, nodes) {
+    var max = 0
+    var min = Infinity
+    graph.forEachNode((node) => {
+        //console.log(node)
+        distance[node] = -1
+        pre[node] = null
+        if (parseInt(node) > max) {
+            max = node
+        }
+        if (parseInt(node) < min) {
+            min = node
+        }
     });
 
-    while (!pq.isEmpty()) {
-       let minNode = pq.dequeue();
-       let currNode = minNode.data;
-       let weight = minNode.priority;
-       this.edges[currNode].forEach(neighbor => {
-          let alt = distances[currNode] + neighbor.weight;
-          if (alt < distances[neighbor.node]) {
-             distances[neighbor.node] = alt;
-             prev[neighbor.node] = currNode;
-             pq.enqueue(neighbor.node, distances[neighbor.node]);
-          }
-       });
+    //console.log(min)
+    //console.log(max)
+
+    // look for source
+    distance[parseInt(min)] = 0
+
+    for (var i = parseInt(min); i <= parseInt(max); i++) {
+        //console.log("bruh")
+        if (distance[i] != null) {
+            //console.log("bruh")
+            //console.log(distance[i])
+            graph.forEachEdge((edge, attributes, source, target, sourceAttributes, targetAttributes) => {
+                if (source == i) {
+                    if (distance[parseInt(source,10)] + 1 > distance[parseInt(target,10)]) {
+                        distance[parseInt(target,10)] = distance[parseInt(source,10)]+1
+                        pre[parseInt(target,10)] = parseInt(source, 10);
+                    }
+                    //console.log(`Edge from ${source} to ${target}`);
+                }
+            });
+        }
+        //console.log(myStringArray[i]);
+        //Do something
     }
-    return distances;
+    //var nodies = []
+    for (var i = parseInt(min); i <= parseInt(max); i++) {
+        if (pre[i]!=null) {
+            //console.log("i")
+            //console.log(i)
+            //console.log("pre[i]")
+            //console.log(pre[i])
+            //remove dups
+            //nodes.push(i)
+            nodes.push(pre[i])
+        }
+    }
+
+    // And the counterparts
+    //graph.forEachEdge(33, callback);
+    //graph.forEachEdge('John', 'Daniel', callback);
+
+    pre[0]="poes"
 }
 
 /**
