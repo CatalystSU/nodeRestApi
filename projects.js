@@ -372,7 +372,7 @@ function bellman(start, distance, pre, graph, nodes) {
             //console.log("pre[i]")
             //console.log(pre[i])
             //remove dups
-            nodes.push(i)
+            //nodes.push(i)
             nodes.push(pre[i])
         }
     }
