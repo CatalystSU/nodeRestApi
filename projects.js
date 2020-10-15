@@ -3,7 +3,7 @@ const { create } = require('domain');
 const router = express.Router();
 
 var driver = require('./neo4j');
-const Graph = require('graphology');
+const DirectedGraph = require('graphology');
 const shortestPath = require('graphology-shortest-path/unweighted');
 var {undirectedSingleSourceLength} = require('graphology-shortest-path/unweighted');
 var {dijkstra} = require('graphology-shortest-path');
@@ -277,7 +277,7 @@ router.get('/critical/:id', (req, res, next) => {
         jsonData["results"] = results;
 
         // bruh momento start the algo
-        const graph = new Graph();
+        const graph = new DirectedGraph();
         var i;
         var nodes = [];
         // add nodes to graph
@@ -291,30 +291,22 @@ router.get('/critical/:id', (req, res, next) => {
         var j;
         // add connections to graph
         //console.log(data.task_ob.tasks)
+        var e
         for (j = 0; j < data.task_ob.cons.length; j++) {
-            graph.addEdge(data.task_ob.cons[j].to, data.task_ob.cons[j].from);
+            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: 1});
+            console.log(graph.isDirected(e));
         }
 
         // GET THE SOURCE NODE
         var distance = [];
         var pre = [];
-        bellman(data.task_ob.tasks[0].task_id, distance, pre, graph, nodes)
+        //bellman(data.task_ob.tasks[0].task_id, distance, pre, graph, nodes)
+        const path = dijkstra.singleSource(graph, "48");
 
-        //console.log(pre[0])
-        //distance[123] = 45
-        //console.log(distance[123])
-
-        // Returning every shortest path between source & every node of the graph
-        //const paths = undirectedSingleSourceLength(graph, data.task_ob.tasks[0].task_id);
-        //const paths = dijkstra.singleSource(graph, data.task_ob.tasks[0].task_id);
-        //const path = dijkstra.bidirectional(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
-        //const path = shortestPath(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
-        //console.log(paths)
         console.log('Number of nodes', graph.order);
         console.log('Number of edges', graph.size);
-        //console.log(path)'
 
-        res.status(200).json(nodes);
+        res.status(200).json(path);
         session.close();
         session1.close();
         session2.close();
@@ -330,7 +322,7 @@ function bellman(start, distance, pre, graph, nodes) {
     var min = Infinity
     graph.forEachNode((node) => {
         //console.log(node)
-        distance[node] = -1
+        distance[node] = Infinity
         pre[node] = null
         if (parseInt(node) > max) {
             max = node
@@ -340,20 +332,13 @@ function bellman(start, distance, pre, graph, nodes) {
         }
     });
 
-    //console.log(min)
-    //console.log(max)
-
     // look for source
     distance[parseInt(min)] = 0
-
-    for (var i = parseInt(min); i <= parseInt(max); i++) {
-        //console.log("bruh")
+    for (var i = parseInt(min); i < parseInt(max); i++) {
         if (distance[i] != null) {
-            //console.log("bruh")
-            //console.log(distance[i])
             graph.forEachEdge((edge, attributes, source, target, sourceAttributes, targetAttributes) => {
                 if (source == i) {
-                    if (distance[parseInt(source,10)] + 1 > distance[parseInt(target,10)]) {
+                    if (distance[parseInt(source,10)] + 1 < distance[parseInt(target,10)]) {
                         distance[parseInt(target,10)] = distance[parseInt(source,10)]+1
                         pre[parseInt(target,10)] = parseInt(source, 10);
                     }
@@ -361,27 +346,18 @@ function bellman(start, distance, pre, graph, nodes) {
                 }
             });
         }
-        //console.log(myStringArray[i]);
-        //Do something
     }
-    //var nodies = []
     for (var i = parseInt(min); i <= parseInt(max); i++) {
         if (pre[i]!=null) {
-            //console.log("i")
-            //console.log(i)
-            //console.log("pre[i]")
-            //console.log(pre[i])
+            console.log("i")
+            console.log(i)
+            console.log("pre[i]")
+            console.log(pre[i])
             //remove dups
-            //nodes.push(i)
+            nodes.push(i)
             nodes.push(pre[i])
         }
     }
-
-    // And the counterparts
-    //graph.forEachEdge(33, callback);
-    //graph.forEachEdge('John', 'Daniel', callback);
-
-    pre[0]="poes"
 }
 
 /**
