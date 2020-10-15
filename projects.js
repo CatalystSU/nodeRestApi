@@ -286,15 +286,24 @@ router.get('/critical/:id', (req, res, next) => {
         // add nodes to graph
         for (i = 0; i < data.task_ob.tasks.length; i++) {
             graph.addNode(data.task_ob.tasks[i].task_id);
+            //nodes.push({"node":data.task_ob.tasks[i].task_id,"dur":data.task_ob.tasks[i].task_id})
+            var test = getDatum(data.task_ob.tasks[i].duration)
+            //console.log(test)
+            nodes[data.task_ob.tasks[i].task_id] = test//getDatum(data.task_ob.tasks[i].duration)
         }
-
+        //console.log(nodes)
         var j;
         // add connections to graph
         var e
+        var weight
+        //duration
         for (j = 0; j < data.task_ob.cons.length; j++) {
-            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: 1});
+            //weight = 
+            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: nodes[data.task_ob.cons[j].from]});
+            console.log(nodes[data.task_ob.cons[j].from])
         }
-
+        var bruh = getDatum("1 day(s)")
+        //console.log(bruh)
         // depth first exhaustive
         //console.log(graph.outNeighbors("47"))
         best = []
@@ -347,6 +356,28 @@ function depthFirstSearch(node, graph) {
 		//best = current;
 		//currentW = [];
 	}
+}
+
+function getDatum(str) {
+    /* Creating date based off of strings, date index by 0 */
+    var datum = new Date(1970, 0, 1, 0, 0, 0, 0);
+    var amount =  parseInt(str.split(" ")[0]);
+    var ret
+    var unit = str.split(" ")[1];
+    if (unit == "Day" ||unit == "Days" ||unit == "days" || unit == "day(s)") {
+        datum.setDate(amount)
+        ret = amount
+    } else if (unit == "weeks" || unit == "week(s)") {
+        datum.setDate(amount*7)
+        ret = amount*7
+    } else if (unit == "months" ||unit == "month(s)") {
+        datum.setMonth(amount)
+        ret = amount*30
+    } else {
+        console.log("BRUH MOMENT");
+    }
+
+    return ret//datum.getTime();
 }
 
 /**
