@@ -283,7 +283,7 @@ router.get('/critical/:id', (req, res, next) => {
         // add nodes to graph
         for (i = 0; i < data.task_ob.tasks.length; i++) {
             graph.addNode(data.task_ob.tasks[i].task_id);
-            nodes.push(data.task_ob.tasks[i].task_id)
+            //nodes.push(data.task_ob.tasks[i].task_id)
         }
 
         var j;
@@ -295,8 +295,9 @@ router.get('/critical/:id', (req, res, next) => {
         // GET THE SOURCE NODE
         var distance = [];
         var pre = [];
-        bellman(data.task_ob.tasks[0].task_id, distance, pre)
-        console.log(pre[0])
+        bellman(data.task_ob.tasks[0].task_id, distance, pre, graph, nodes)
+
+        //console.log(pre[0])
         //distance[123] = 45
         //console.log(distance[123])
 
@@ -321,7 +322,55 @@ router.get('/critical/:id', (req, res, next) => {
     });
 });
 
-function bellman(start, distance, pre) {
+function bellman(start, distance, pre, graph, nodes) {
+    var max = 0
+    var min = Infinity
+    graph.forEachNode((node) => {
+        distance[node] = Infinity
+        pre[node] = null
+        if (node > max) {
+            max = node
+        }
+        if (node < min) {
+            min = node
+        }
+    });
+    console.log(min)
+    console.log(max)
+
+    distance[min] = 0
+
+    for (var i = min; i <= max; i++) {
+        if (distance[i] != null) {
+            //console.log(distance[i])
+            graph.forEachEdge((edge, attributes, source, target, sourceAttributes, targetAttributes) => {
+                if (source == i) {
+                    if (distance[parseInt(source,10)] + 1 < distance[parseInt(target,10)]) {
+                        distance[parseInt(target,10)] = distance[parseInt(source,10)]+1
+                        pre[parseInt(target,10)] = parseInt(source, 10);
+                    }
+                    console.log(`Edge from ${source} to ${target}`);
+                }
+            });
+        }
+        //console.log(myStringArray[i]);
+        //Do something
+    }
+    //var nodies = []
+    for (var i = min; i <= max; i++) {
+        if (pre[i]!=null) {
+            console.log("i")
+            console.log(i)
+            console.log("pre[i]")
+            console.log(pre[i])
+            nodes.push(pre[i])
+        }
+    }
+
+    // And the counterparts
+    //graph.forEachEdge(33, callback);
+    //graph.forEachEdge('John', 'Daniel', callback);
+
     pre[0]="poes"
 }
 
