@@ -297,7 +297,10 @@ router.get('/critical/:id', (req, res, next) => {
 
         // depth first exhaustive
         //console.log(graph.outNeighbors("47"))
-        
+        best = []
+        bestW = -Infinity;
+        current = [];
+        currentW = 0;
 		graph.forEachNode(function(node) {
 			//When the node is a start node
 			if (graph.inNeighbors(node).length == 0) {
