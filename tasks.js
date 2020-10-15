@@ -45,6 +45,85 @@ router.post('/create', (req, res, next) => {
         console.log(error);
     });
 });
+
+/**
+ * Verify all dates of connected nodes are correct. TODO:
+ * @param {JSON} project 
+ */
+function verify(project) {
+    cons = project.cons;
+    for (let i = 0; i < cons.length; i++) {
+        const con = cons[i];
+        
+    }
+}
+
+/**
+ * Get the index of the task with given id.
+ * @param {Array of tasks} tasks 
+ * @param {Number} task_id 
+ */
+function getTaskIndex(tasks, task_id) {
+    var i = 0;
+    for (i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        if (task.task_id == task_id) {
+            break;
+        }
+    }
+    return i;
+}
+
+/**
+ * Get end date from given start date and duration. TODO:
+ * @param {String} date 
+ * @param {String} duration 
+ */
+function findDate(date, duration) {
+    var sections = date.split("/");
+    start = new Date(sections[2], sections[1], sections[0], 0, 0, 0, 0);
+    console.log(start.getFullYear());
+}
+
+/**
+ * Create link between tasks
+ */
+router.post('/dev/link', (req, res, next) => {
+    var session = driver.session();
+    var request = {
+        task_id1: req.body.task_id2,
+        task_id2: req.body.task_id1
+    };
+    session
+    .run('MATCH (t1:Task) WHERE ID(t1) = $task_id1\
+        MATCH (t2:Task) WHERE ID(t2) = $task_id2\
+        return t1, t2', request)
+    .then(function(result) {
+        
+        try {
+            for (let i = 0; i < result.records.length; i++) {
+                const element = result.records[i];
+                findDate(element._fields[0].properties.startdate);
+            }
+            res.status(200).json(result);
+            session.close();
+            return;
+        } catch (error) {
+            res.status(500).json({
+                message:"Couldnt try",
+                error:error
+            });
+            session.close();
+            return;
+        }
+        
+    })
+    .catch(function(error) {
+        res.status(500).json({status:"Cannot create Link"});
+        console.log(error);
+    });
+});
+
 /**
  * Create link between tasks
  */
@@ -57,9 +136,7 @@ router.post('/link', (req, res, next) => {
     session
     .run('MATCH (t1:Task) WHERE ID(t1) = $task_id1\
         MATCH (t2:Task) WHERE ID(t2) = $task_id2\
-        CREATE (t1)-[:UNDER]->(t2)\
-        MATCH (t1)-[:UNDER]->(n)\
-        return n', request)
+        CREATE (t1)-[:UNDER]->(t2)', request)
     .then(function(result) {
         res.status(200).json({status:"Created Link", result:result});
         result.records.forEach(function(record) {
