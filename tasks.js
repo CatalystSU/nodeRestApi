@@ -13,7 +13,7 @@ router.post('/create', (req, res, next) => {
         project_id: req.body.project_id,
         taskname: req.body.taskname,
         personincharge: req.body.personincharge,
-        packagemanager: req.body.packagemangaer,
+        packagemanager: req.body.packagemanager,
         startdate: req.body.startdate,
         duration: req.body.duration,
         enddate: req.body.enddate,
@@ -57,9 +57,11 @@ router.post('/link', (req, res, next) => {
     session
     .run('MATCH (t1:Task) WHERE ID(t1) = $task_id1\
         MATCH (t2:Task) WHERE ID(t2) = $task_id2\
-        CREATE (t1)-[:UNDER]->(t2)', request)
+        CREATE (t1)-[:UNDER]->(t2)\
+        MATCH (t1)-[:UNDER]->(n)\
+        return n', request)
     .then(function(result) {
-        res.status(200).json({status:"Created Link"});
+        res.status(200).json({status:"Created Link", result:result});
         result.records.forEach(function(record) {
             console.log(record.get('title'));
             console.log(record);
