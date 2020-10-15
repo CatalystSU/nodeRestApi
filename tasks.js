@@ -31,7 +31,7 @@ router.post('/create', (req, res, next) => {
         enddate:$enddate, \
         taskresources:$taskresources, \
         taskprogress:$taskprogress}) \
-        CREATE (t)-[:UNDER {task_id:[ID(t)]}]->(p)', request)
+        CREATE (t)-[:UNDER]->(p)', request)
     .then(function(result) {
         res.status(200).json({status:"Created Task"});
         result.records.forEach(function(record) {

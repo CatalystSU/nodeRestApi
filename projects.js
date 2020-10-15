@@ -7,7 +7,37 @@ const { waitForDebugger } = require('inspector');
 const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 
 router.post('/upload', (req, res, next) => {
-    res.status(200).json({"bruh":"bruh"});
+    var session = driver.session();
+    
+    var request = "";
+    request += `CREATE (p:Project {name:"${req.body.project_name}"})`;
+    for (let index = 0; index < req.body.tasks.length; index++) {
+        const task = req.body.tasks[index];
+        request += `CREATE (t${task.task_id}:Task {\
+                    duration:"${task.duration}",\
+                    taskprogress:${task.taskprogress},\
+                    enddate:"${task.enddate}",\
+                    packagemanager:"${task.packagemanager}",\
+                    taskname:"${task.taskname}",\
+                    taskresources:"${task.taskresources}",\
+                    startdate:"${task.startdate}",\
+                    personincharge:"${task.personincharge}"})`;
+        request += `CREATE (t${task.task_id})-[:UNDER]->(p)`;
+    };
+    for (let index = 0; index < req.body.cons.length; index++) {
+        const con = req.body.cons[index];
+        request += `CREATE (t${con.to})-[:UNDER]->(t${con.from})`;
+    };
+
+    session
+    .run(request)
+    .then(function(result) {
+        res.status(200).json(result);
+    })
+    .catch(function(error) {
+        res.status(500).json({status:"Cannot create project"})
+        console.log(error);
+    });
 });
 
 /**
