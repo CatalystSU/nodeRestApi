@@ -113,5 +113,23 @@ function bellman(start, distance, pre, graph, nodes) {
 
 // console.log('Number of nodes', graph.order);
 // console.log('Number of edges', graph.size);
+function getDatum(str) {
+  var sections = date.split("/");
+  /* Creating date based off of strings, date index by 0 */
+  var datum = new Date(1970, 0, 1, 0, 0, 0, 0);
 
+  var amount =  parseInt(str.split(" ")[0]);
+  var unit = str.split(" ")[1];
+  if (unit == "day(s)") {
+      datum.setDate(amount)
+  } else if (unit == "week(s)") {
+      datum.setDate(amount*7)
+  } else if (unit == "month(s)") {
+      datum.setMonth(amount)
+  } else {
+      console.log("BRUH MOMENT");
+  }
+
+  return datum.getTime();
+}
 

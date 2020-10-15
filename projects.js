@@ -296,15 +296,17 @@ router.get('/critical/:id', (req, res, next) => {
         }
 
         // depth first exhaustive
-        console.log(graph.outNeighbors("47"))
-
+        //console.log(graph.outNeighbors("47"))
+        
 		graph.forEachNode(function(node) {
 			//When the node is a start node
 			if (graph.inNeighbors(node).length == 0) {
-				depthFirstSearch(node, graph);
+                current.push(parseInt(node));
+                depthFirstSearch(node, graph);
+                current.pop(node);
 			}
 		});
-        res.status(200).json(graph.toJSON());
+        res.status(200).json(best);
         session.close();
         session1.close();
         session2.close();
@@ -316,25 +318,31 @@ router.get('/critical/:id', (req, res, next) => {
 });
 
 var best = [];
-var bestW = Infinity;
+var bestW = -Infinity;
 var current = [];
-var currentW = Infinity;
+var currentW = 0;
 
-depthFirstSearch(node, graph) {
+function depthFirstSearch(node, graph) {
 	var isEnd = true;
 	graph.outNeighbors(node).forEach(function(child) {
-		var w = graph.getEdgeAttribute(node, child, 'weight');
-		currentW += w;
-		current.push(child);
+        var w = parseInt(graph.getEdgeAttribute(node, child, 'weight'));
+        //console.log(w)
+        currentW += w;
+        //console.log(child)
+		current.push(parseInt(child));
 		depthFirstSearch(child, graph);
 		current.pop(child);
 		currentW -= w;
 		isEnd = false;
 	});
 	if (isEnd && currentW > bestW) {
-		bestW = currentW;
-		best = currentW;
-		currentW = [];
+        bestW = currentW;
+        best = [];
+        for (let i = 0; i < current.length; i++) {
+            best.push(parseInt(current[i]))
+        }
+		//best = current;
+		//currentW = [];
 	}
 }
 
