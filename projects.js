@@ -147,6 +147,9 @@ router.get('/temp/:id', (req, res, next) => {
     };
 });
 
+
+
+
 /**
  * Get Project Node via ID
  */
@@ -289,6 +292,14 @@ router.get('/critical/:id', (req, res, next) => {
             graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to);
         }
 
+        // GET THE SOURCE NODE
+        var distance = [];
+        var pre = [];
+        bellman(data.task_ob.tasks[0].task_id, distance, pre)
+        console.log(pre[0])
+        //distance[123] = 45
+        //console.log(distance[123])
+
         // Returning every shortest path between source & every node of the graph
         //const paths = undirectedSingleSourceLength(graph, data.task_ob.tasks[0].task_id);
         //const paths = dijkstra.singleSource(graph, data.task_ob.tasks[0].task_id);
@@ -310,33 +321,8 @@ router.get('/critical/:id', (req, res, next) => {
     });
 });
 
-function djikstraAlgorithm(startNode) {
-    let distances = {};
-    // Stores the reference to previous nodes
-    let prev = {};
-    let pq = new PriorityQueue(this.nodes.length * this.nodes.length);
-    // Set distances to all nodes to be infinite except startNode
-    distances[startNode] = 0;
-    pq.enqueue(startNode, 0);
-    this.nodes.forEach(node => {
-       if (node !== startNode) distances[node] = Infinity;
-       prev[node] = null;
-    });
-
-    while (!pq.isEmpty()) {
-       let minNode = pq.dequeue();
-       let currNode = minNode.data;
-       let weight = minNode.priority;
-       this.edges[currNode].forEach(neighbor => {
-          let alt = distances[currNode] + neighbor.weight;
-          if (alt < distances[neighbor.node]) {
-             distances[neighbor.node] = alt;
-             prev[neighbor.node] = currNode;
-             pq.enqueue(neighbor.node, distances[neighbor.node]);
-          }
-       });
-    }
-    return distances;
+function bellman(start, distance, pre) {
+    pre[0]="poes"
 }
 
 /**
