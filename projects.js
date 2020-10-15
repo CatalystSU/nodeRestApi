@@ -295,9 +295,15 @@ router.get('/critical/:id', (req, res, next) => {
         // depth first exhaustive
         console.log(graph.outNeighbors("47"))
 
-        graph.outNeighbors("47").forEach(function(record) {
+        /*graph.outNeighbors("47").forEach(function(record) {
             console.log(record)
-        });
+        });*/
+		graph.forEachNode(function(node) {
+			//When the node is a start node
+			if (graph.inNeighbors(node).length == 0) {
+				depthFirstSearch(node, graph);
+			}
+		});
         res.status(200).json(graph.toJSON());
         session.close();
         session1.close();
@@ -308,6 +314,29 @@ router.get('/critical/:id', (req, res, next) => {
         console.log(error);
     });
 });
+
+var best = [];
+var bestW = Infinity;
+var current = [];
+var currentW = Infinity;
+
+depthFirstSearch(node, graph) {
+	var isEnd = true;
+	graph.outNeighbors(node).forEach(function(child) {
+		var w = graph.getEdgeAttribute(node, child, 'weight');
+		currentW += w;
+		current.push(child);
+		depthFirstSearch(child, graph);
+		current.pop(child);
+		currentW -= w;
+		isEnd = false;
+	});
+	if (isEnd && currentW > bestW) {
+		bestW = currentW;
+		best = currentW;
+		currentW = [];
+	}
+}
 
 /**
  * Get all tasks with given resource
