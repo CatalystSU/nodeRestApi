@@ -217,6 +217,7 @@ router.get('/:id', (req, res, next) => {
         console.log(error);
     });
 });
+
 router.get('/devvy/:id', (req, res, next) => {
     var idd = req.params.id
     var viewData = {};
@@ -281,7 +282,7 @@ function getProject(id) {
                 if (record.get('n').properties.taskprogress.low != null) {
                     temp.taskprogress = record.get('n').properties.taskprogress.low
                 }
-                //console.log(record.get('n').properties)
+
                 temp.task_id = record.get('n').identity.low
                 data.task_ob.tasks.push(temp);
                 count++;
@@ -294,8 +295,6 @@ function getProject(id) {
             });
 
             jsonData["results"] = results;
-            //res.status(200).json(data);
-            //console.log(data)
             session.close();
             session1.close();
             session2.close();
@@ -303,7 +302,6 @@ function getProject(id) {
             resolve(data)
         })
         .catch(function(error) {
-            //res.status(404).json({status:"id not found"})
             reject(error)
             console.log(error);
         });
