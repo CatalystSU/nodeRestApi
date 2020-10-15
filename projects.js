@@ -292,7 +292,7 @@ router.get('/critical/:id', (req, res, next) => {
         // add connections to graph
         //console.log(data.task_ob.tasks)
         for (j = 0; j < data.task_ob.cons.length; j++) {
-            graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to);
+            graph.addEdge(data.task_ob.cons[j].to, data.task_ob.cons[j].from);
         }
 
         // GET THE SOURCE NODE
