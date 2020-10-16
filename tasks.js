@@ -174,11 +174,43 @@ function getDate(date, duration) {
  * Create link between tasks
  */
 router.post('/dev/link', auth, (req, res, next) => {
-    try {
-        res.status(200).json(verify(req.body));
-    } catch (error) {
-        res.status(500).json(error);
-    }
+    var session = driver.session();
+    var request = {
+        task_id1: req.body.task_id2,
+        task_id2: req.body.task_id1,
+        project_id: req.body.project_id
+    };
+    session
+    .run('MATCH (t1:Task) WHERE ID(t1) = $task_id1\
+        MATCH (t2:Task) WHERE ID(t2) = $task_id2\
+        CREATE (t1)-[:UNDER]->(t2)', request)
+    .then(function(result) {
+        getProject(request.project_id)
+        .then(function(result) {
+            verify(result);
+            update_all(result)
+            .then(function(result) {
+                res.status(200).json({status:"Created Link"});
+                session.close();
+            })
+            .catch(function(result) {
+                res.status(500).json({status:"Couldn't update Tasks"});
+                console.log(error);
+                session.close();
+            });
+        })
+        .catch(function(error) {
+            res.status(500).json({status:"Couldnt Get project"});
+            console.log(error);
+            session.close();
+        });
+        
+    })
+    .catch(function(error) {
+        res.status(500).json({status:"Cannot create Link"});
+        console.log(error);
+        session.close();
+    });
 });
 
 /**
@@ -360,5 +392,80 @@ router.delete('/:id', auth, (req, res, next) => {
         console.log(error);
     });
 });
+
+/**
+ * Returns full project JSON
+ * @param {Number} id 
+ */
+function getProject(id) {
+    return new Promise(function(resolve, reject) {
+        var session = driver.session();
+        var session1 = driver.session();
+        var session2 = driver.session();
+        var data = {
+            id: Number(id),
+            task_ob: {
+                tasks: [],
+                cons: []
+            }
+
+        };
+        var viewData = {};
+        var jsonData = {};
+        var request = {
+            id: Number(id)
+        }
+        Promise.all([
+            session.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                RETURN p', request),
+
+            session1.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                MATCH (p)<-[:UNDER]-(n) \
+                RETURN n', request),
+
+            session2.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                MATCH (p)<-[:UNDER]-(n) \
+                MATCH (n)<-[:UNDER]-(n1) \
+                RETURN ID(n), ID(n1)', request)
+        ])
+        .then(function(results) {
+            // set the project name
+            data.name = results[0].records[0].get('p').properties.name
+
+            // get the tasks
+            var length = results[1].records.length;
+            let count = 0;
+            results[1].records.forEach(function(record) {
+                // I will assume even number of entries -> odd + odd = even and even + even = even
+                var temp
+                temp = record.get('n').properties
+                if (record.get('n').properties.taskprogress.low != null) {
+                    temp.taskprogress = record.get('n').properties.taskprogress.low
+                }
+
+                temp.task_id = record.get('n').identity.low
+                data.task_ob.tasks.push(temp);
+                count++;
+            });
+
+            // get connections
+            results[2].records.forEach(function(record) {
+                temp = record._fields
+                data.task_ob.cons.push({"from":temp[1].low,"to":temp[0].low})
+            });
+
+            jsonData["results"] = results;
+            session.close();
+            session1.close();
+            session2.close();
+            console.log(data)
+            resolve(data)
+        })
+        .catch(function(error) {
+            reject(error)
+            console.log(error);
+        });
+    });
+}
 
 module.exports = router;
