@@ -6,6 +6,7 @@ var driver = require('./neo4j');
 const e = require('express');
 const { start } = require('repl');
 const { appendFileSync } = require('fs');
+const auth = require('./auth');
 
 /**
  * Create Task node

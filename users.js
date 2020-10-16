@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 var driver = require('./neo4j');
 const { waitForDebugger } = require('inspector');
 const { SSL_OP_EPHEMERAL_RSA } = require('constants');
+const auth = require('./auth');
 
 
 /**
