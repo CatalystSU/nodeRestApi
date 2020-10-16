@@ -244,7 +244,7 @@ function getProject(id) {
 
 
 
-router.post('/critical/:id', auth, (req, res, next) => {
+router.post('/critical/:id', (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
@@ -313,7 +313,7 @@ router.post('/critical/:id', auth, (req, res, next) => {
         var j;
         for (j = 0; j < data.task_ob.cons.length; j++) {
             e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: nodes[data.task_ob.cons[j].to]}); //TODO: switch to and from TODO: TODO: TODO:
-            console.log(nodes[data.task_ob.cons[j].from])
+            //console.log(nodes[data.task_ob.cons[j].from])
         }
 
         best = []
@@ -369,7 +369,7 @@ function getDatum(str) {
     var amount =  parseInt(str.split(" ")[0]);
     var ret
     var unit = str.split(" ")[1];
-    if (unit == "Day" ||unit == "Days" ||unit == "days" || unit == "day(s)") {
+    if (unit == "Day" ||unit == "Days" ||unit == "days" || unit == "day(s)" ||unit == "Day(s)" ) {
         datum.setDate(amount)
         ret = amount
     } else if (unit == "weeks" || unit == "week(s)") {
@@ -379,7 +379,7 @@ function getDatum(str) {
         datum.setMonth(amount)
         ret = amount*30
     } else {
-        console.log("BRUH MOMENT");
+        console.log("BRUH MOMENT - "+str);
     }
 
     return ret//datum.getTime();
