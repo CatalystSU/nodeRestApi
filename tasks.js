@@ -10,7 +10,7 @@ const { appendFileSync } = require('fs');
 /**
  * Create Task node
  */
-router.post('/create', (req, res, next) => {
+router.post('/create', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         project_id: req.body.project_id,
@@ -173,7 +173,7 @@ function getDate(date, duration) {
 /**
  * Create link between tasks
  */
-router.post('/dev/link', (req, res, next) => {
+router.post('/dev/link', auth, (req, res, next) => {
     try {
         res.status(200).json(verify(req.body));
     } catch (error) {
@@ -184,7 +184,7 @@ router.post('/dev/link', (req, res, next) => {
 /**
  * Create link between tasks
  */
-router.post('/link', (req, res, next) => {
+router.post('/link', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         task_id1: req.body.task_id2,
@@ -213,7 +213,7 @@ router.post('/link', (req, res, next) => {
 /**
  * Update Task node via ID
  */
-router.post('/update', (req, res, next) => {
+router.post('/update', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         id: req.body.task_id,
@@ -251,7 +251,7 @@ router.post('/update', (req, res, next) => {
 /**
  * Get all Task nodes
  */
-router.get('/all', (req, res, next) => {
+router.post('/all', auth, (req, res, next) => {
     var session = driver.session();
     var projects = [];
     session
@@ -282,7 +282,7 @@ router.get('/all', (req, res, next) => {
 /**
  * Get Task node via ID
  */
-router.get('/:id', (req, res, next) => {
+router.post('/:id', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         id: Number(req.params.id)
@@ -345,7 +345,7 @@ function update_all(project) {
 /**
  * Delete Task via node ID
  */
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         id: Number(req.params.id)
