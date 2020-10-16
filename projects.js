@@ -50,7 +50,7 @@ router.post('/upload', (req, res, next) => {
 /**
  * Create Project node, auto assigned ID
  */
-router.post('/create', (req, res, next) => {
+router.post('/create',auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         name: req.body.name
@@ -154,7 +154,7 @@ router.get('/temp/:id', (req, res, next) => {
  * Get Project Node via ID
  */
 //const auth = require('check-auth');
-router.get('/:id', auth, (req, res, next) => {
+router.get('/:id', (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
