@@ -3,7 +3,7 @@ const { create } = require('domain');
 const router = express.Router();
 
 var driver = require('./neo4j');
-const Graph = require('graphology');
+const DirectedGraph = require('graphology');
 const shortestPath = require('graphology-shortest-path/unweighted');
 var {undirectedSingleSourceLength} = require('graphology-shortest-path/unweighted');
 var {dijkstra} = require('graphology-shortest-path');
@@ -68,7 +68,6 @@ router.post('/create', (req, res, next) => {
         res.status(500).json({status:"Cannot create project"})
         console.log(error);
     });
-    
 });
 
 /**
@@ -150,9 +149,6 @@ router.get('/temp/:id', (req, res, next) => {
     };
 });
 
-
-
-
 /**
  * Get Project Node via ID
  */
@@ -160,6 +156,7 @@ router.get('/:id', (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
+    var idd = req.params.id
     var data = {
         id: Number(req.params.id),
         task_ob: {
@@ -200,7 +197,6 @@ router.get('/:id', (req, res, next) => {
             if (record.get('n').properties.taskprogress.low != null) {
                 temp.taskprogress = record.get('n').properties.taskprogress.low
             }
-            console.log(record.get('n').properties)
             temp.task_id = record.get('n').identity.low
             data.task_ob.tasks.push(temp);
             count++;
@@ -214,6 +210,7 @@ router.get('/:id', (req, res, next) => {
 
         jsonData["results"] = results;
         res.status(200).json(data);
+
         session.close();
         session1.close();
         session2.close();
@@ -223,6 +220,99 @@ router.get('/:id', (req, res, next) => {
         console.log(error);
     });
 });
+
+router.get('/devvy/:id', (req, res, next) => {
+    var idd = req.params.id
+    var viewData = {};
+    var jsonData = {};
+    var request = {
+        id: Number(req.params.id)
+    }
+
+    getProject(idd)
+    .then(function(result) {
+        res.status(200).json(result);
+    })
+    .catch(function(error) {
+        res.status(404).json({status:"id not found"})
+        console.log(error);
+    });
+
+});
+
+function getProject(id) {
+    return new Promise(function(resolve, reject) {
+        var session = driver.session();
+        var session1 = driver.session();
+        var session2 = driver.session();
+        var data = {
+            id: Number(id),
+            task_ob: {
+                tasks: [],
+                cons: []
+            }
+
+        };
+        var viewData = {};
+        var jsonData = {};
+        var request = {
+            id: Number(id)
+        }
+        Promise.all([
+            session.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                RETURN p', request),
+
+            session1.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                MATCH (p)<-[:UNDER]-(n) \
+                RETURN n', request),
+
+            session2.run('  MATCH (p:Project) WHERE ID(p) = $id \
+                MATCH (p)<-[:UNDER]-(n) \
+                MATCH (n)<-[:UNDER]-(n1) \
+                RETURN ID(n), ID(n1)', request)
+        ])
+        .then(function(results) {
+            // set the project name
+            data.name = results[0].records[0].get('p').properties.name
+
+            // get the tasks
+            var length = results[1].records.length;
+            let count = 0;
+            results[1].records.forEach(function(record) {
+                // I will assume even number of entries -> odd + odd = even and even + even = even
+                var temp
+                temp = record.get('n').properties
+                if (record.get('n').properties.taskprogress.low != null) {
+                    temp.taskprogress = record.get('n').properties.taskprogress.low
+                }
+
+                temp.task_id = record.get('n').identity.low
+                data.task_ob.tasks.push(temp);
+                count++;
+            });
+
+            // get connections
+            results[2].records.forEach(function(record) {
+                temp = record._fields
+                data.task_ob.cons.push({"from":temp[1].low,"to":temp[0].low})
+            });
+
+            jsonData["results"] = results;
+            session.close();
+            session1.close();
+            session2.close();
+            console.log(data)
+            resolve(data)
+        })
+        .catch(function(error) {
+            reject(error)
+            console.log(error);
+        });
+    });
+}
+
+
+
 
 router.get('/critical/:id', (req, res, next) => {
     var session = driver.session();
@@ -280,44 +370,34 @@ router.get('/critical/:id', (req, res, next) => {
         jsonData["results"] = results;
 
         // bruh momento start the algo
-        const graph = new Graph();
+        const graph = new DirectedGraph();
         var i;
         var nodes = [];
         // add nodes to graph
-        //console.log(data.task_ob.tasks)
         for (i = 0; i < data.task_ob.tasks.length; i++) {
             graph.addNode(data.task_ob.tasks[i].task_id);
-            console.log(data.task_ob.tasks[i].task_id)
-            //nodes.push(data.task_ob.tasks[i].task_id)
+            var test = getDatum(data.task_ob.tasks[i].duration)
+            nodes[data.task_ob.tasks[i].task_id] = test
         }
 
         var j;
-        // add connections to graph
-        //console.log(data.task_ob.tasks)
         for (j = 0; j < data.task_ob.cons.length; j++) {
-            graph.addEdge(data.task_ob.cons[j].to, data.task_ob.cons[j].from);
+            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: nodes[data.task_ob.cons[j].from]}); //TODO: switch to and from
+            console.log(nodes[data.task_ob.cons[j].from])
         }
 
-        // GET THE SOURCE NODE
-        var distance = [];
-        var pre = [];
-        bellman(data.task_ob.tasks[0].task_id, distance, pre, graph, nodes)
-
-        //console.log(pre[0])
-        //distance[123] = 45
-        //console.log(distance[123])
-
-        // Returning every shortest path between source & every node of the graph
-        //const paths = undirectedSingleSourceLength(graph, data.task_ob.tasks[0].task_id);
-        //const paths = dijkstra.singleSource(graph, data.task_ob.tasks[0].task_id);
-        //const path = dijkstra.bidirectional(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
-        //const path = shortestPath(graph, data.task_ob.tasks[0].task_id, data.task_ob.tasks[data.task_ob.tasks.length-1].task_id);
-        //console.log(paths)
-        console.log('Number of nodes', graph.order);
-        console.log('Number of edges', graph.size);
-        //console.log(path)'
-
-        res.status(200).json(nodes);
+        best = []
+        bestW = -Infinity;
+        current = [];
+        currentW = 0;
+		graph.forEachNode(function(node) {
+			if (graph.inNeighbors(node).length == 0) {
+                current.push(parseInt(node));
+                depthFirstSearch(node, graph);
+                current.pop(node);
+			}
+		});
+        res.status(200).json(best);
         session.close();
         session1.close();
         session2.close();
@@ -328,63 +408,51 @@ router.get('/critical/:id', (req, res, next) => {
     });
 });
 
-function bellman(start, distance, pre, graph, nodes) {
-    var max = 0
-    var min = Infinity
-    graph.forEachNode((node) => {
-        //console.log(node)
-        distance[node] = -1
-        pre[node] = null
-        if (parseInt(node) > max) {
-            max = node
-        }
-        if (parseInt(node) < min) {
-            min = node
-        }
-    });
+var best = [];
+var bestW = -Infinity;
+var current = [];
+var currentW = 0;
 
-    //console.log(min)
-    //console.log(max)
-
-    // look for source
-    distance[parseInt(min)] = 0
-
-    for (var i = parseInt(min); i <= parseInt(max); i++) {
-        //console.log("bruh")
-        if (distance[i] != null) {
-            //console.log("bruh")
-            //console.log(distance[i])
-            graph.forEachEdge((edge, attributes, source, target, sourceAttributes, targetAttributes) => {
-                if (source == i) {
-                    if (distance[parseInt(source,10)] + 1 > distance[parseInt(target,10)]) {
-                        distance[parseInt(target,10)] = distance[parseInt(source,10)]+1
-                        pre[parseInt(target,10)] = parseInt(source, 10);
-                    }
-                    //console.log(`Edge from ${source} to ${target}`);
-                }
-            });
+function depthFirstSearch(node, graph) {
+	var isEnd = true;
+	graph.outNeighbors(node).forEach(function(child) {
+        var w = parseInt(graph.getEdgeAttribute(node, child, 'weight'));
+        currentW += w;
+		current.push(parseInt(child));
+		depthFirstSearch(child, graph);
+		current.pop(child);
+		currentW -= w;
+		isEnd = false;
+	});
+	if (isEnd && currentW > bestW) {
+        bestW = currentW;
+        best = [];
+        for (let i = 0; i < current.length; i++) {
+            best.push(parseInt(current[i]))
         }
-        //console.log(myStringArray[i]);
-        //Do something
-    }
-    //var nodies = []
-    for (var i = parseInt(min); i <= parseInt(max); i++) {
-        if (pre[i]!=null) {
-            //console.log("i")
-            //console.log(i)
-            //console.log("pre[i]")
-            //console.log(pre[i])
-            //remove dups
-            //nodes.push(i)
-            nodes.push(pre[i])
-        }
+	}
+}
+
+function getDatum(str) {
+    /* Creating date based off of strings, date index by 0 */
+    var datum = new Date(1970, 0, 1, 0, 0, 0, 0);
+    var amount =  parseInt(str.split(" ")[0]);
+    var ret
+    var unit = str.split(" ")[1];
+    if (unit == "Day" ||unit == "Days" ||unit == "days" || unit == "day(s)") {
+        datum.setDate(amount)
+        ret = amount
+    } else if (unit == "weeks" || unit == "week(s)") {
+        datum.setDate(amount*7)
+        ret = amount*7
+    } else if (unit == "months" ||unit == "month(s)") {
+        datum.setMonth(amount)
+        ret = amount*30
+    } else {
+        console.log("BRUH MOMENT");
     }
 
-    // And the counterparts
-    //graph.forEachEdge(33, callback);
-    //graph.forEachEdge('John', 'Daniel', callback);
-
-    pre[0]="poes"
+    return ret//datum.getTime();
 }
 
 /**
@@ -435,7 +503,6 @@ router.post('/update/:id', (req, res, next) => {
         res.status(500).json({status:"Cannot Update project"})
         console.log(error);
     });
-    
 });
 
 /**
