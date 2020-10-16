@@ -459,13 +459,13 @@ router.delete('/:id', (req, res, next) => {
         id: Number(req.params.id)
     }
     session
-    .run('MATCH (n:Project) WHERE ID(n) = $id DELETE n', request)
-    .then(function() {
+    .run('MATCH (n:Project) WHERE ID(n) = $id DETACH DELETE n', request) //TODO: delete all the tasks aswell
+    .then(function(result) {
         res.status(200).json("Deleted Project");
         session.close;
     })
     .catch(function(error) {
-        res.status(400).json("Project does not exist");
+        res.status(400).json(error);
         session.close
         console.log(error);
     });

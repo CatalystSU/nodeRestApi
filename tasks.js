@@ -94,8 +94,8 @@ function greater_than(start, end) {
  * @param {JSON} project 
  */
 function verify(project) {
-    cons = project.cons;
-    tasks = project.tasks;
+    cons = project.task_ob.cons;
+    tasks = project.task_ob.tasks;
     var updated = true;
     while (updated) {
         updated = false;
@@ -121,7 +121,7 @@ function verify(project) {
                 updated = true;
             }
         }
-        console.log(project);
+        //console.log(project);
     }
     return project;
 }
@@ -188,13 +188,14 @@ router.post('/dev/link', auth, (req, res, next) => {
     .then(function(result) {
         getProject(request.project_id)
         .then(function(result) {
+            console.log({poes:result});
             verify(result);
             update_all(result)
             .then(function(result) {
                 res.status(200).json({status:"Created Link"});
                 session.close();
             })
-            .catch(function(result) {
+            .catch(function(error) {
                 res.status(500).json({status:"Couldn't update Tasks"});
                 console.log(error);
                 session.close();
@@ -348,7 +349,7 @@ router.post('/:id', auth, (req, res, next) => {
  */
 function update_all(project) {
     return new Promise(function(resolve, reject) {
-        tasks = project.tasks;
+        tasks = project.task_ob.tasks;
         var session = driver.session();
         var request = "";
         for (let index = 0; index < tasks.length; index++) {
@@ -366,10 +367,10 @@ function update_all(project) {
         session
         .run(request)
         .then(function(result) {
-            resolve(200);
+            resolve(result);
         })
         .catch(function(error) {
-            reject(500);
+            reject(error);
         });
     });
 }
@@ -459,8 +460,8 @@ function getProject(id) {
             session.close();
             session1.close();
             session2.close();
-            console.log(data)
-            resolve(data)
+            //console.log(data);
+            resolve(data);
         })
         .catch(function(error) {
             reject(error)
