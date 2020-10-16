@@ -10,6 +10,9 @@ var {dijkstra} = require('graphology-shortest-path');
 const { waitForDebugger } = require('inspector');
 const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 
+/**
+ * Upload an entire project from json.
+ */
 router.post('/upload', (req, res, next) => {
     var session = driver.session();
     var request = "";

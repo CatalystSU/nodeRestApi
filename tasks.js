@@ -5,6 +5,7 @@ const router = express.Router();
 var driver = require('./neo4j');
 const e = require('express');
 const { start } = require('repl');
+const { appendFileSync } = require('fs');
 
 /**
  * Create Task node
@@ -49,7 +50,46 @@ router.post('/create', (req, res, next) => {
 });
 
 /**
- * Verify all dates of connected nodes are correct. TODO:
+ * Return true if start > end false otherwise
+ * @param {String} start 
+ * @param {String} end 
+ */
+function greater_than(start, end) {
+    /* Splitting the date string */
+    var sections = start.split("/");
+    var start_year = parseInt(sections[2]);
+    var start_month = parseInt(sections[1]);
+    var start_day = parseInt(sections[0]);
+    sections = end.split("/");
+    var end_year = parseInt(sections[2]);
+    var end_month = parseInt(sections[1]);
+    var end_day = parseInt(sections[0]);
+
+    if (start_year > end_year) {
+        return true;
+    } else if (start_year < end_year){
+        return false;
+    } else {
+        if (start_month > end_month) {
+            return true;
+        } else if (start_month < end_month){
+            return false;
+        } else {
+            if (start_day > end_day) {
+                return true;
+            } else if (start_day < end_day){
+                return false;
+            } else {
+                return false;
+            }
+        }
+    }
+
+
+}
+
+/**
+ * Verify all dates of connected nodes are correct.
  * @param {JSON} project 
  */
 function verify(project) {
@@ -60,16 +100,21 @@ function verify(project) {
         updated = false;
         for (let i = 0; i < cons.length; i++) {
             const con = cons[i];
-            var from = tasks[getTaskIndex(tasks, con.from)];
-            var to = tasks[getTaskIndex(tasks, con.to)];
+            var from_index = getTaskIndex(tasks, con.from);
+            var to_index = getTaskIndex(tasks, con.to);
+            var from = tasks[from_index];
+            var to = tasks[to_index];
+            /* from end date = start + duration */
             if (from.enddate != getDate(from.startdate, from.duration)) {
                 from.enddate = getDate(from.startdate, from.duration);
                 updated = true;
             }
-            if (to.startdate != from.enddate) {
+            /* to start = from end */
+            if (greater_than(from.enddate, to.startdate)) {
                 to.startdate = from.enddate;
                 updated = true;
             }
+            /* to end = start + duration */
             if (to.enddate != getDate(to.startdate, to.duration)) {
                 to.enddate = getDate(to.startdate, to.duration);
                 updated = true;
@@ -150,6 +195,7 @@ router.post('/link', (req, res, next) => {
         MATCH (t2:Task) WHERE ID(t2) = $task_id2\
         CREATE (t1)-[:UNDER]->(t2)', request)
     .then(function(result) {
+        /* TODO: add link then get json and verify then update all */
         res.status(200).json({status:"Created Link", result:result});
         result.records.forEach(function(record) {
             console.log(record.get('title'));
@@ -262,6 +308,38 @@ router.get('/:id', (req, res, next) => {
         console.log(error);
     });
 });
+
+/**
+ * Create request string to update all tasks.
+ * @param {JSON} project 
+ */
+function update_all(project) {
+    return new Promise(function(resolve, reject) {
+        tasks = project.tasks;
+        var session = driver.session();
+        var request = "";
+        for (let index = 0; index < tasks.length; index++) {
+            const task = tasks[index];
+            request += `MATCH (p:Task) WHERE ID(p) = ${task.task_id} UNWIND p as x SET x = {\
+                        duration:"${task.duration}",\
+                        taskprogress:${task.taskprogress},\
+                        enddate:"${task.enddate}",\
+                        packagemanager:"${task.packagemanager}",\
+                        taskname:"${task.taskname}",\
+                        taskresources:"${task.taskresources}",\
+                        startdate:"${task.startdate}",\
+                        personincharge:"${task.personincharge}"})`;
+        };
+        session
+        .run(request)
+        .then(function(result) {
+            resolve(200);
+        })
+        .catch(function(error) {
+            reject(500);
+        });
+    });
+}
 
 
 /**
