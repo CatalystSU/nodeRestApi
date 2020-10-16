@@ -6,6 +6,7 @@ var driver = require('./neo4j');
 const e = require('express');
 const { start } = require('repl');
 const { appendFileSync } = require('fs');
+const auth = require('./auth');
 
 /**
  * Create Task node
@@ -377,7 +378,7 @@ function update_all(project) {
 /**
  * Delete Task via node ID
  */
-router.delete('/:id', auth, (req, res, next) => {
+router.delete('/:id', (req, res, next) => {
     var session = driver.session();
     var request = {
         id: Number(req.params.id)

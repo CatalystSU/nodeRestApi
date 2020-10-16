@@ -453,7 +453,7 @@ router.post('/update/:id', auth, (req, res, next) => {
 /**
  * Delete Project node via ID
  */
-router.delete('/:id', auth, (req, res, next) => {
+router.delete('/:id', (req, res, next) => {
     var session = driver.session();
     var request = {
         id: Number(req.params.id)
