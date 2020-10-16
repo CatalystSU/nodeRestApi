@@ -312,7 +312,7 @@ router.post('/critical/:id', auth, (req, res, next) => {
 
         var j;
         for (j = 0; j < data.task_ob.cons.length; j++) {
-            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: nodes[data.task_ob.cons[j].from]}); //TODO: switch to and from
+            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: nodes[data.task_ob.cons[j].to]}); //TODO: switch to and from TODO: TODO: TODO:
             console.log(nodes[data.task_ob.cons[j].from])
         }
 
