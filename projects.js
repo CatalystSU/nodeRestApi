@@ -74,7 +74,7 @@ router.post('/create',auth, (req, res, next) => {
 /**
  * Get All Project nodes
  */
-router.get('/all', (req, res, next) => {
+router.post('/all', auth, (req, res, next) => {
     var session = driver.session();
     var projects = [];
     session
@@ -151,7 +151,7 @@ router.get('/temp/:id', (req, res, next) => {
 });
 
 
-router.get('/devvy/:id', (req, res, next) => {
+router.post('/devvy/:id', (req, res, next) => {
     var idd = req.params.id
     var viewData = {};
     var jsonData = {};
@@ -244,7 +244,7 @@ function getProject(id) {
 
 
 
-router.get('/critical/:id', (req, res, next) => {
+router.post('/critical/:id', auth, (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
@@ -388,7 +388,7 @@ function getDatum(str) {
 /**
  * Get all tasks with given resource
  */
-router.post('/resources', (req, res, next) => {
+router.post('/resources', auth, (req, res, next) => {
     var tasks = []
     var session = driver.session();
     var request = {
@@ -417,7 +417,7 @@ router.post('/resources', (req, res, next) => {
 /**
  * Update Project node via ID
  */
-router.post('/update/:id', (req, res, next) => {
+router.post('/update/:id', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         id: Number(req.params.id),
@@ -460,7 +460,7 @@ router.delete('/:id', (req, res, next) => {
  * Get Project Node via ID
  */
 //const auth = require('check-auth');
-router.get('/:id', (req, res, next) => {
+router.post('/:id', auth, (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
