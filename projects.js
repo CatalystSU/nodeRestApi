@@ -14,7 +14,7 @@ const auth = require('./auth');
 /**
  * Upload an entire project from json.
  */
-router.post('/upload', (req, res, next) => {
+router.post('/upload', auth, (req, res, next) => {
     var session = driver.session();
     var request = "";
     request += `CREATE (p:Project {name:"${req.body.project_name}"})`;

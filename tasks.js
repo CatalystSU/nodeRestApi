@@ -35,13 +35,10 @@ router.post('/create', auth, (req, res, next) => {
         enddate:$enddate, \
         taskresources:$taskresources, \
         taskprogress:$taskprogress}) \
-        CREATE (t)-[:UNDER]->(p)', request)
+        CREATE (t)-[:UNDER]->(p)\
+        RETURN ID(t)', request)
     .then(function(result) {
-        res.status(200).json({status:"Created Task"});
-        result.records.forEach(function(record) {
-            console.log(record.get('title'));
-            console.log(record);
-        });
+        res.status(200).json({status:"Created Task", task_id:result.records[0]._fields[0].low});
         session.close();
     })
     .catch(function(error) {
@@ -149,26 +146,26 @@ function getTaskIndex(tasks, task_id) {
  */
 function getDate(date, duration) {
     /* Splitting the date string */
-    var sections = date.split("/");
+    var sections = date.split("-");
     /* Creating date based off of strings, date index by 0 */
-    var start = new Date(sections[2], sections[1]-1, sections[0], 0, 0, 0, 0);
+    var start = new Date(sections[0], sections[1]-1, sections[2], 0, 0, 0, 0);
 
     /* Find correct amount of days */
     var amount =  parseInt(duration.split(" ")[0]);
     var unit = duration.split(" ")[1];
-    if (unit == "days") {
+    if (unit == "day(s)") {
         console.log("Days");
         start.setDate(start.getDate() + amount);
-    } else if (unit == "weeks") {
+    } else if (unit == "week(s)") {
         console.log("Weeks");
         start.setDate(start.getDate() + (amount * 7));
-    } else if (unit == "months") {
+    } else if (unit == "month(s)") {
         console.log("Months");
         start.setMonth(start.getMonth() + amount);
     } else {
         console.log("findDate: Unit not recognised")
     }
-    return "" + start.getDate() + "/" + (start.getMonth() + 1) + "/" + start.getFullYear();
+    return "" + start.getFullYear() + "-" + (start.getMonth() + 1) + "-" + start.getDate()  ;
 }
 
 /**
@@ -362,8 +359,10 @@ function update_all(project) {
                         taskname:"${task.taskname}",\
                         taskresources:"${task.taskresources}",\
                         startdate:"${task.startdate}",\
-                        personincharge:"${task.personincharge}"})`;
+                        personincharge:"${task.personincharge}"} \
+                        WITH count(*) as dummy `;
         };
+        request += ' RETURN dummy '
         session
         .run(request)
         .then(function(result) {
