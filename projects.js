@@ -312,7 +312,7 @@ router.post('/critical/:id', auth, (req, res, next) => {
 
         var j;
         for (j = 0; j < data.task_ob.cons.length; j++) {
-            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].from, {weight: nodes[data.task_ob.cons[j].to]}); //TODO: switch to and from
+            e = graph.addEdge(data.task_ob.cons[j].from, data.task_ob.cons[j].to, {weight: nodes[data.task_ob.cons[j].from]}); //TODO: switch to and from
             console.log(nodes[data.task_ob.cons[j].from])
         }
 
@@ -444,13 +444,13 @@ router.delete('/:id', (req, res, next) => {
         id: Number(req.params.id)
     }
     session
-    .run('MATCH (n:Project) WHERE ID(n) = $id DETACH DELETE n', request) //TODO: delete all the tasks aswell
-    .then(function(result) {
+    .run('MATCH (n:Project) WHERE ID(n) = $id DELETE n', request)
+    .then(function() {
         res.status(200).json("Deleted Project");
         session.close;
     })
     .catch(function(error) {
-        res.status(400).json(error);
+        res.status(400).json("Project does not exist");
         session.close
         console.log(error);
     });
