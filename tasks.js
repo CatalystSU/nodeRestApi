@@ -178,7 +178,17 @@ function getDate(date, duration) {
     } else {
         console.log("findDate: Unit not recognised")
     }
-    var ret = "" + start.getFullYear() + "-" + (start.getMonth() + 1) + "-" + start.getDate();
+    var ret = "" + start.getFullYear();
+    if (start.getMonth < 10) {
+        ret += "-0" + start.getMonth(); 
+    } else {
+        ret += start.getMonth();
+    }
+    if (start.getDate < 10) {
+        ret += "-0" + start.getDate(); 
+    } else {
+        ret += start.getDate();
+    }
     console.log("Ret = " + ret);
     return ret;
 }
@@ -186,7 +196,7 @@ function getDate(date, duration) {
 /**
  * Create link between tasks
  */
-router.post('/dev/link', auth, (req, res, next) => {
+router.post('/link', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         task_id1: req.body.task_id2,
@@ -231,7 +241,7 @@ router.post('/dev/link', auth, (req, res, next) => {
  * Create link between tasks
  */
 //TODO: old route get rid of if new route works
-router.post('/link', auth, (req, res, next) => {
+router.post('/dev/link', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         task_id1: req.body.task_id2,
@@ -280,11 +290,30 @@ router.post('/update', auth, (req, res, next) => {
                 taskresources:$taskresources, \
                 taskprogress:$taskprogress}', request)
     .then(function(result) {
-        res.status(200).json({status: "updated"})
+        getProject(request.project_id)
+        .then(function(result) {
+            console.log({poes:result});
+            verify(result);
+            update_all(result)
+            .then(function(result) {
+                res.status(200).json({status:"Updated"});
+                session.close();
+            })
+            .catch(function(error) {
+                res.status(500).json({status:"Couldn't update Tasks"});
+                console.log(error);
+                session.close();
+            });
+        })
+        .catch(function(error) {
+            res.status(500).json({status:"Couldnt Get project"});
+            console.log(error);
+            session.close();
+        });
         
     })
     .catch(function(error) {
-        res.status(500).json({status:"Cannot Update task"});
+        res.status(500).json({status:"Cannot update task"});
         console.log(error);
         session.close();
     });

@@ -78,14 +78,16 @@ router.post('/create',auth, (req, res, next) => {
 /**
  * Get All Project nodes
  */
-router.post('/all', auth, (req, res, next) => { //TODO: only show projects you have access to
+router.post('/all', auth, (req, res, next) => { //only show projects you have access to
     var session = driver.session();
     var projects = [];
     session
-    .run('MATCH (n:Project) RETURN n')
+    .run(`MATCH (u:User) WHERE u.email = "${req.userData.email}" \
+            MATCH (u)-[:access_to]->(p) \
+            RETURN p`)
     .then(function(result) {
         result.records.forEach(function(record) {
-            projects.push({name:record.get('n').properties.name, id:record.get('n').identity.low});
+            projects.push({name:record.get('p').properties.name, id:record.get('p').identity.low});
         });
         res.status(200).json(projects);
         session.close();
