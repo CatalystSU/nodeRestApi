@@ -61,13 +61,13 @@ router.post('/create', auth, (req, res, next) => {
 function greater_than(start, end) {
     /* Splitting the date string */
     var sections = start.split("/");
-    var start_year = parseInt(sections[2]);
+    var start_year = parseInt(sections[0]);
     var start_month = parseInt(sections[1]);
-    var start_day = parseInt(sections[0]);
+    var start_day = parseInt(sections[2]);
     sections = end.split("/");
-    var end_year = parseInt(sections[2]);
+    var end_year = parseInt(sections[0]);
     var end_month = parseInt(sections[1]);
-    var end_day = parseInt(sections[0]);
+    var end_day = parseInt(sections[2]);
 
     if (start_year > end_year) {
         return true;
@@ -250,6 +250,7 @@ router.post('/update', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         id: req.body.task_id,
+        project_id: req.body.project_id,
         taskname: req.body.taskname,
         personincharge: req.body.personincharge,
         packagemanager: req.body.packagemanager,
