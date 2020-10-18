@@ -38,8 +38,14 @@ router.post('/create', auth, (req, res, next) => {
         CREATE (t)-[:UNDER]->(p)\
         RETURN ID(t)', request)
     .then(function(result) {
-        res.status(200).json({status:"Created Task", task_id:result.records[0]._fields[0].low});
-        session.close();
+        if (result.records.length < 1) {
+            res.status(400).json({status:"Couldn't create task"});
+            session.close();
+        } else {
+            res.status(200).json({status:"Created Task", task_id:result.records[0]._fields[0].low});
+            session.close();
+        }
+        
     })
     .catch(function(error) {
         res.status(500).json({status:"Cannot create task"});
@@ -171,7 +177,7 @@ function getDate(date, duration) {
 /**
  * Create link between tasks
  */
-router.post('/dev/link', auth, (req, res, next) => {
+router.post('/link', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         task_id1: req.body.task_id2,
@@ -215,7 +221,8 @@ router.post('/dev/link', auth, (req, res, next) => {
 /**
  * Create link between tasks
  */
-router.post('/link', auth, (req, res, next) => {
+//TODO: old route get rid of if new route works
+router.post('/dev/link', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         task_id1: req.body.task_id2,
@@ -227,10 +234,6 @@ router.post('/link', auth, (req, res, next) => {
         CREATE (t1)-[:UNDER]->(t2)', request)
     .then(function(result) {
         res.status(200).json({status:"Created Link", result:result});
-        result.records.forEach(function(record) {
-            console.log(record.get('title'));
-            console.log(record);
-        });
         session.close();
     })
     .catch(function(error) {
@@ -267,12 +270,32 @@ router.post('/update', auth, (req, res, next) => {
                 taskresources:$taskresources, \
                 taskprogress:$taskprogress}', request)
     .then(function(result) {
-        res.status(200).json({status:"Update Successful"});
-        session.close();
+        getProject(request.project_id)
+        .then(function(result) {
+            console.log({poes:result});
+            verify(result);
+            update_all(result)
+            .then(function(result) {
+                res.status(200).json({status:"Updated Tasks"});
+                session.close();
+            })
+            .catch(function(error) {
+                res.status(500).json({status:"Couldn't update Tasks"});
+                console.log(error);
+                session.close();
+            });
+        })
+        .catch(function(error) {
+            res.status(500).json({status:"Couldnt Get project"});
+            console.log(error);
+            session.close();
+        });
+        
     })
     .catch(function(error) {
-        res.status(500).json({status:"Cannot Update Task"});
+        res.status(500).json({status:"Cannot Update task"});
         console.log(error);
+        session.close();
     });
     
 });

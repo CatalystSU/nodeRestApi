@@ -78,7 +78,7 @@ router.post('/create',auth, (req, res, next) => {
 /**
  * Get All Project nodes
  */
-router.post('/all', auth, (req, res, next) => {
+router.post('/all', auth, (req, res, next) => { //TODO: only show projects you have access to
     var session = driver.session();
     var projects = [];
     session
@@ -171,7 +171,7 @@ function getProject(id) {
 
 
 
-router.post('/critical/:id', (req, res, next) => {
+router.post('/critical/:id', auth, proj_auth, (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
@@ -315,7 +315,7 @@ function getDatum(str) {
 /**
  * Get all tasks with given resource
  */
-router.post('/resources', auth, (req, res, next) => {
+router.post('/resources', auth, proj_auth, (req, res, next) => {
     var tasks = []
     var session = driver.session();
     var request = {
@@ -344,7 +344,7 @@ router.post('/resources', auth, (req, res, next) => {
 /**
  * Update Project node via ID
  */
-router.post('/update/:id', auth, (req, res, next) => {
+router.post('/update/:id', auth, proj_auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         id: Number(req.params.id),
