@@ -20,11 +20,17 @@ module.exports = (req, res, next) => {
             MATCH (u)-[link:access_to]->(p) \
             return link', request)
     .then(function(result) {
-        console.log(result);
-        next();
+        if (result.records.length < 1) {
+            console.log(result);
+            res.status(400).json({status: "Permission denied"})
+        } else {
+            console.log(result);
+            next();
+        }
+        
     })
     .catch(function(error) {
-        res.status(400).json({status: "Permission denied"})
+        res.status(500).json({status: "Unable to query neo4j"})
         console.log(error);
     });
 };
