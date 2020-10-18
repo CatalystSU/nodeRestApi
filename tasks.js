@@ -108,8 +108,8 @@ function verify(project) {
         updated = false;
         for (let i = 0; i < cons.length; i++) {
             const con = cons[i];
-            var from_index = getTaskIndex(tasks, con.to);
-            var to_index = getTaskIndex(tasks, con.from);
+            var from_index = getTaskIndex(tasks, con.from);
+            var to_index = getTaskIndex(tasks, con.to);
             var from = tasks[from_index];
             var to = tasks[to_index];
             /* from end date = start + duration */
@@ -158,6 +158,7 @@ function getDate(date, duration) {
     /* Splitting the date string */
     var sections = date.split("-");
     /* Creating date based off of strings, date index by 0 */
+    console.log("sections = " + sections);
     var start = new Date(sections[0], sections[1]-1, sections[2], 0, 0, 0, 0);
     console.log("Date = " + start);
     console.log("Duration = " + duration);
