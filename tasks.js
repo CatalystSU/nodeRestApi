@@ -61,13 +61,17 @@ router.post('/create', auth, (req, res, next) => {
 function greater_than(start, end) {
     /* Splitting the date string */
     var sections = start.split("-");
+    
+    
     var start_year = parseInt(sections[0]);
     var start_month = parseInt(sections[1]);
     var start_day = parseInt(sections[2]);
+    // console.log(start_year + " " + start_month + " " + start_day);
     sections = end.split("-");
     var end_year = parseInt(sections[0]);
     var end_month = parseInt(sections[1]);
     var end_day = parseInt(sections[2]);
+    // console.log(end_year + " " + end_month + " " + end_day);
 
     if (start_year > end_year) {
         return true;
@@ -104,8 +108,8 @@ function verify(project) {
         updated = false;
         for (let i = 0; i < cons.length; i++) {
             const con = cons[i];
-            var from_index = getTaskIndex(tasks, con.from);
-            var to_index = getTaskIndex(tasks, con.to);
+            var from_index = getTaskIndex(tasks, con.to);
+            var to_index = getTaskIndex(tasks, con.from);
             var from = tasks[from_index];
             var to = tasks[to_index];
             /* from end date = start + duration */
@@ -155,6 +159,8 @@ function getDate(date, duration) {
     var sections = date.split("-");
     /* Creating date based off of strings, date index by 0 */
     var start = new Date(sections[0], sections[1]-1, sections[2], 0, 0, 0, 0);
+    console.log("Date = " + start);
+    console.log("Duration = " + duration);
 
     /* Find correct amount of days */
     var amount =  parseInt(duration.split(" ")[0]);
@@ -171,13 +177,15 @@ function getDate(date, duration) {
     } else {
         console.log("findDate: Unit not recognised")
     }
-    return "" + start.getFullYear() + "-" + (start.getMonth() + 1) + "-" + start.getDate()  ;
+    var ret = "" + start.getFullYear() + "-" + (start.getMonth() + 1) + "-" + start.getDate();
+    console.log("Ret = " + ret);
+    return ret;
 }
 
 /**
  * Create link between tasks
  */
-router.post('/link', auth, (req, res, next) => {
+router.post('/dev/link', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         task_id1: req.body.task_id2,
@@ -222,7 +230,7 @@ router.post('/link', auth, (req, res, next) => {
  * Create link between tasks
  */
 //TODO: old route get rid of if new route works
-router.post('/dev/link', auth, (req, res, next) => {
+router.post('/link', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         task_id1: req.body.task_id2,
