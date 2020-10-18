@@ -10,6 +10,7 @@ var {dijkstra} = require('graphology-shortest-path');
 const { waitForDebugger } = require('inspector');
 const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 const auth = require('./auth');
+const proj_auth = require('./proj_auth');
 
 /**
  * Upload an entire project from json.
@@ -437,7 +438,7 @@ router.delete('/:id', (req, res, next) => {
  * Get Project Node via ID
  */
 //const auth = require('check-auth');
-router.post('/:id', auth, (req, res, next) => {
+router.post('/:id', auth, proj_auth, (req, res, next) => {
     var session = driver.session();
     var session1 = driver.session();
     var session2 = driver.session();
