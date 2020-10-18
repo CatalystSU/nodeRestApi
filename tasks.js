@@ -259,7 +259,7 @@ router.post('/update', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         id: req.body.task_id,
-        project_id: req.body.project_id,
+        //project_id: req.body.project_id,
         taskname: req.body.taskname,
         personincharge: req.body.personincharge,
         packagemanager: req.body.packagemanager,
@@ -280,26 +280,7 @@ router.post('/update', auth, (req, res, next) => {
                 taskresources:$taskresources, \
                 taskprogress:$taskprogress}', request)
     .then(function(result) {
-        getProject(request.project_id)
-        .then(function(result) {
-            console.log({poes:result});
-            verify(result);
-            update_all(result)
-            .then(function(result) {
-                res.status(200).json({status:"Updated Tasks"});
-                session.close();
-            })
-            .catch(function(error) {
-                res.status(500).json({status:"Couldn't update Tasks"});
-                console.log(error);
-                session.close();
-            });
-        })
-        .catch(function(error) {
-            res.status(500).json({status:"Couldnt Get project"});
-            console.log(error);
-            session.close();
-        });
+        res.status(200).json({status: "updated"})
         
     })
     .catch(function(error) {
