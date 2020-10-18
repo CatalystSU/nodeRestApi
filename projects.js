@@ -18,7 +18,9 @@ const proj_auth = require('./proj_auth');
 router.post('/upload', auth, (req, res, next) => { //TODO: Add linking to user node
     var session = driver.session();
     var request = "";
+    request += `MATCH (u:User) WHERE u.email = "${req.userData.email}" `;
     request += `CREATE (p:Project {name:"${req.body.project_name}"})`;
+    request += `CREATE (u)-[:access_to]->(p)`;
     for (let index = 0; index < req.body.tasks.length; index++) {
         const task = req.body.tasks[index];
         request += `CREATE (t${task.task_id}:Task {\
@@ -48,35 +50,11 @@ router.post('/upload', auth, (req, res, next) => { //TODO: Add linking to user n
     });
 });
 
-/**
- * Create Project node, auto assigned ID
- */
-router.post('/create',auth, (req, res, next) => {
-    var session = driver.session();
-    var request = {
-        name: req.body.name,
-        user_email: req.userData.email
-    }
-    session
-    .run('CREATE (n:Project {name:$name})', request)
-    .then(function(result) {
-        res.status(200).json(result);
-        result.records.forEach(function(record) {
-            console.log(record.get('title'))
-            console.log(record)
-        });
-        session.close();
-    })
-    .catch(function(error) {
-        res.status(500).json({status:"Cannot create project"})
-        console.log(error);
-    });
-});
 
 /**
  * Create Project node, auto assigned ID
  */
-router.post('/create/dev',auth, (req, res, next) => {
+router.post('/create',auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         name: req.body.name,
@@ -118,32 +96,6 @@ router.post('/all', auth, (req, res, next) => {
     });
 });
 
-/**
- * Get Project Node via ID
- */
-router.post('/temp/:id', auth, (req, res, next) => {
-    res.status(200).json(req.userData);
-});
-
-
-router.post('/devvy/:id', (req, res, next) => {
-    var idd = req.params.id
-    var viewData = {};
-    var jsonData = {};
-    var request = {
-        id: Number(req.params.id)
-    }
-
-    getProject(idd)
-    .then(function(result) {
-        res.status(200).json(result);
-    })
-    .catch(function(error) {
-        res.status(404).json({status:"id not found"})
-        console.log(error);
-    });
-
-});
 
 function getProject(id) {
     return new Promise(function(resolve, reject) {
