@@ -226,7 +226,6 @@ router.post('/link', auth, (req, res, next) => {
         MATCH (t2:Task) WHERE ID(t2) = $task_id2\
         CREATE (t1)-[:UNDER]->(t2)', request)
     .then(function(result) {
-        /* TODO: add link then get json and verify then update all */
         res.status(200).json({status:"Created Link", result:result});
         result.records.forEach(function(record) {
             console.log(record.get('title'));

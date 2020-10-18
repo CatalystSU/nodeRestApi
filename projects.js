@@ -14,7 +14,7 @@ const auth = require('./auth');
 /**
  * Upload an entire project from json.
  */
-router.post('/upload', auth, (req, res, next) => {
+router.post('/upload', auth, (req, res, next) => { //TODO: Add linking to user node
     var session = driver.session();
     var request = "";
     request += `CREATE (p:Project {name:"${req.body.project_name}"})`;
@@ -53,7 +53,8 @@ router.post('/upload', auth, (req, res, next) => {
 router.post('/create',auth, (req, res, next) => {
     var session = driver.session();
     var request = {
-        name: req.body.name
+        name: req.body.name,
+        user_email: req.userData.email
     }
     session
     .run('CREATE (n:Project {name:$name})', request)
@@ -63,6 +64,30 @@ router.post('/create',auth, (req, res, next) => {
             console.log(record.get('title'))
             console.log(record)
         });
+        session.close();
+    })
+    .catch(function(error) {
+        res.status(500).json({status:"Cannot create project"})
+        console.log(error);
+    });
+});
+
+/**
+ * Create Project node, auto assigned ID
+ */
+router.post('/create/dev',auth, (req, res, next) => {
+    var session = driver.session();
+    var request = {
+        name: req.body.name,
+        user_email: req.userData.email
+    }
+    session
+    .run('MATCH (u:User) WHERE u.email = $user_email \
+            CREATE (n:Project {name:$name}) \
+            CREATE (u)-[:access_to]->(n) \
+            return ID(n)', request)
+    .then(function(result) {
+        res.status(200).json({status:"Created Project", project_id:result.records[0]._fields[0].low});
         session.close();
     })
     .catch(function(error) {
@@ -95,59 +120,8 @@ router.post('/all', auth, (req, res, next) => {
 /**
  * Get Project Node via ID
  */
-router.get('/temp/:id', (req, res, next) => {
-    if (req.params.id == 5) {
-        res.status(200).json({
-            name: "Epi_use5",
-            id: 5,
-            task_ob: {
-                tasks: [
-                    {taskname: "Task0", id:0, show: true, personincharge: "Freddie", packagemanager: "Bob", startdate: "15/10/2020", duration: 3, enddate: "01/11/2020", taskresources: "ben, fred", taskprogress: 50},
-                    {taskname: "Task1", id:1, show: true, personincharge: "Henry", packagemanager: "Bob", startdate: "16/10/2020", duration: 4, enddate: "12/11/2020", taskresources: "ben, jeff", taskprogress: 23},
-                    {taskname: "Task2", id:2, show: true, personincharge: "Chloe", packagemanager: "Bob", startdate: "25/10/2020", duration: 3, enddate: "15/12/2020", taskresources: "franny, fred", taskprogress: 70},
-                    {taskname: "Task3", id:3, show: true, personincharge: "Lucy", packagemanager: "Bob", startdate: "15/11/2020", duration: 5, enddate: "17/11/2020", taskresources: "ben, bob", taskprogress: 50},
-                    {taskname: "Task4", id:4, show: true, personincharge: "Nick", packagemanager: "Bob", startdate: "16/10/2020", duration: 3, enddate: "18/10/2020", taskresources: "joe, nic", taskprogress: 60},
-                ],
-                cons: [
-                    {from: 0, to: 1},
-                    {from: 0, to: 3},
-                    {from: 1, to: 2},
-                    {from: 2, to: 4},
-                    {from: 3, to: 4},
-                ]
-            }
-        });
-    } else if (req.params.id == 6) {
-        res.status(200).json({
-            name: "Epi_use6",
-            id: 6,
-            task_ob: {
-                tasks: [
-                    {taskname: "Task0", id:0, show: true, personincharge: "Freddie", packagemanager: "Bob", startdate: "15/10/2020", duration: 3, enddate: "01/11/2020", taskresources: "ben, fred", taskprogress: 50},
-                    {taskname: "Task1", id:1, show: true, personincharge: "Henry", packagemanager: "Bob", startdate: "16/10/2020", duration: 4, enddate: "12/11/2020", taskresources: "ben, jeff", taskprogress: 23},
-                    {taskname: "Task2", id:2, show: true, personincharge: "Chloe", packagemanager: "Bob", startdate: "25/10/2020", duration: 3, enddate: "15/12/2020", taskresources: "franny, fred", taskprogress: 70},
-                    {taskname: "Task3", id:3, show: true, personincharge: "Lucy", packagemanager: "Bob", startdate: "15/11/2020", duration: 5, enddate: "17/11/2020", taskresources: "ben, bob", taskprogress: 50},
-                    {taskname: "Task4", id:4, show: true, personincharge: "Nick", packagemanager: "Bob", startdate: "16/10/2020", duration: 3, enddate: "18/10/2020", taskresources: "joe, nic", taskprogress: 60},
-                    {taskname: "Task5", id:5, show: true, personincharge: "Freddie", packagemanager: "Bob", startdate: "15/10/2020", duration: 3, enddate: "01/11/2020", taskresources: "ben, fred", taskprogress: 50},
-                    {taskname: "Task6", id:6, show: true, personincharge: "Henry", packagemanager: "Bob", startdate: "16/10/2020", duration: 4, enddate: "12/11/2020", taskresources: "ben, jeff", taskprogress: 23},
-                    {taskname: "Task7", id:7, show: true, personincharge: "Chloe", packagemanager: "Bob", startdate: "25/10/2020", duration: 3, enddate: "15/12/2020", taskresources: "franny, fred", taskprogress: 70},
-                ],
-                cons: [
-                    {from: 0, to: 1},
-                    {from: 0, to: 3},
-                    {from: 0, to: 7},
-                    {from: 1, to: 2},
-                    {from: 2, to: 4},
-                    {from: 3, to: 5},
-                    {from: 6, to: 1},
-                ]
-            }
-        });
-    } else {
-        res.status(400).json({
-            message: "Not found"
-        });
-    };
+router.post('/temp/:id', auth, (req, res, next) => {
+    res.status(200).json(req.userData);
 });
 
 
@@ -431,6 +405,7 @@ router.post('/update/:id', auth, (req, res, next) => {
     })
     .catch(function(error) {
         res.status(500).json({status:"Cannot Update project"})
+        session.close();
         console.log(error);
     });
 });
@@ -444,14 +419,16 @@ router.delete('/:id', (req, res, next) => {
         id: Number(req.params.id)
     }
     session
-    .run('MATCH (n:Project) WHERE ID(n) = $id DELETE n', request)
+    .run('MATCH (n:Project) WHERE ID(n) = $id \
+            MATCH (t:Task)-[:UNDER]->(n) \
+            DETACH DELETE n, t', request)
     .then(function() {
-        res.status(200).json("Deleted Project");
-        session.close;
+        res.status(200).json({status: "Deleted Project"});
+        session.close();
     })
     .catch(function(error) {
-        res.status(400).json("Project does not exist");
-        session.close
+        res.status(400).json({status: "Unable to delete project", error: error});
+        session.close();
         console.log(error);
     });
 });
