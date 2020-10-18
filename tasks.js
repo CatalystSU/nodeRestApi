@@ -60,11 +60,11 @@ router.post('/create', auth, (req, res, next) => {
  */
 function greater_than(start, end) {
     /* Splitting the date string */
-    var sections = start.split("/");
+    var sections = start.split("-");
     var start_year = parseInt(sections[0]);
     var start_month = parseInt(sections[1]);
     var start_day = parseInt(sections[2]);
-    sections = end.split("/");
+    sections = end.split("-");
     var end_year = parseInt(sections[0]);
     var end_month = parseInt(sections[1]);
     var end_day = parseInt(sections[2]);
