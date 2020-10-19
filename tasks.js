@@ -179,12 +179,12 @@ function getDate(date, duration) {
         console.log("findDate: Unit not recognised")
     }
     var ret = "" + start.getFullYear();
-    if (start.getMonth < 10) {
+    if (start.getMonth() < 10) {
         ret += "-0" + start.getMonth(); 
     } else {
         ret += "-" + start.getMonth();
     }
-    if (start.getDate < 10) {
+    if (start.getDate() < 10) {
         ret += "-0" + start.getDate(); 
     } else {
         ret += "-" + start.getDate();
