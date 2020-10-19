@@ -182,12 +182,12 @@ function getDate(date, duration) {
     if (start.getMonth < 10) {
         ret += "-0" + start.getMonth(); 
     } else {
-        ret += start.getMonth();
+        ret += "-" + start.getMonth();
     }
     if (start.getDate < 10) {
         ret += "-0" + start.getDate(); 
     } else {
-        ret += start.getDate();
+        ret += "-" + start.getDate();
     }
     console.log("Ret = " + ret);
     return ret;
