@@ -159,7 +159,7 @@ function getDate(date, duration) {
     var sections = date.split("-");
     /* Creating date based off of strings, date index by 0 */
     console.log("sections = " + sections);
-    var start = new Date(sections[0], sections[1]-1, sections[2], 0, 0, 0, 0);
+    var start = new Date(parseInt(sections[0]), parseInt(sections[1])-1, parseInt(sections[2]), 0, 0, 0, 0);
     console.log("Date = " + start);
     console.log("Duration = " + duration);
 
@@ -179,10 +179,10 @@ function getDate(date, duration) {
         console.log("findDate: Unit not recognised")
     }
     var ret = "" + start.getFullYear();
-    if (start.getMonth() < 10) {
-        ret += "-0" + start.getMonth(); 
+    if (start.getMonth() < 9) {
+        ret += "-0" + (start.getMonth()+1); 
     } else {
-        ret += "-" + start.getMonth();
+        ret += "-" + (start.getMonth()+1);
     }
     if (start.getDate() < 10) {
         ret += "-0" + start.getDate(); 
