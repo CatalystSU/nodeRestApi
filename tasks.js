@@ -506,7 +506,7 @@ function getProject(id) {
         })
         .catch(function(error) {
             reject(error)
-            console.log(error);
+            console.log(error); 
         });
     });
 }
