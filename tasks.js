@@ -269,7 +269,7 @@ router.post('/update', auth, (req, res, next) => {
     var session = driver.session();
     var request = {
         id: req.body.task_id,
-        //project_id: req.body.project_id,
+        project_id: req.body.project_id,
         taskname: req.body.taskname,
         personincharge: req.body.personincharge,
         packagemanager: req.body.packagemanager,
